@@ -28,134 +28,92 @@
             --amber-bg:      #FFF8E6;
             --amber-border:  rgba(125,90,0,0.2);
             --mono:          'DM Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
-            --r-sm:  8px;
-            --r-md:  12px;
-            --r-lg:  20px;
-            --r-xl:  26px;
+            --r-sm:  8px; --r-md:  12px; --r-lg:  20px; --r-xl:  26px;
             --shadow-sm: 0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04);
             --shadow-md: 0 4px 20px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.05);
             --shadow-lg: 0 20px 60px rgba(0,0,0,0.14), 0 0 0 1px rgba(0,0,0,0.06);
         }
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
-            background-color: var(--bg); color: var(--text); min-height: 100vh;
-            -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
-        }
-
+        body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif; background-color: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
         .topbar { height: 3px; background: linear-gradient(90deg, #0066CC 0%, #34AADC 50%, #30D158 100%); }
         .container { max-width: 1440px; margin: 0 auto; padding: 44px 44px 80px; }
 
-        /* Header */
-        .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 36px; animation: fadeUp 0.5s ease both; }
-        .header-left h1 { font-size: 32px; font-weight: 700; letter-spacing: -0.8px; color: var(--text); line-height: 1; }
+        .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 36px; }
+        .header-left h1 { font-size: 32px; font-weight: 700; letter-spacing: -0.8px; }
         .header-left .subtitle { font-size: 13px; color: var(--text-secondary); margin-top: 5px; }
         .header-right { display: flex; align-items: center; gap: 12px; }
 
         .live-badge { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; color: var(--text-secondary); background: var(--surface); border: 1px solid var(--border-strong); padding: 6px 13px; border-radius: 999px; box-shadow: var(--shadow-sm); }
-        .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-dim); transition: background 0.4s; }
+        .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-dim); }
         .live-dot.connected { background: #30D158; animation: pulse-dot 2.4s ease infinite; }
-        .live-dot.error { background: #FF3B30; }
         @keyframes pulse-dot { 0% { box-shadow: 0 0 0 0 rgba(48,209,88,0.5); } 60% { box-shadow: 0 0 0 5px rgba(48,209,88,0); } 100%{ box-shadow: 0 0 0 0 rgba(48,209,88,0); } }
 
-        .btn { display: none; align-items: center; gap: 6px; border: none; padding: 9px 18px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s, transform 0.15s, box-shadow 0.2s; }
-        .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border-strong); box-shadow: var(--shadow-sm); }
-        .btn-secondary:hover { background: var(--surface2); transform: translateY(-1px); }
+        .btn { display: none; align-items: center; gap: 6px; border: none; padding: 9px 18px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border-strong); }
         .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 2px 10px rgba(0,102,204,0.25); display: flex; }
-        .btn-primary:hover { background: #005AB5; box-shadow: 0 4px 16px rgba(0,102,204,0.35); transform: translateY(-1px); }
-        .btn:active { transform: scale(0.97); }
+        .btn:hover { transform: translateY(-1px); }
 
-        /* Toast */
-        .toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-12px); z-index: 300; display: flex; align-items: center; gap: 8px; background: var(--text); color: #fff; padding: 10px 20px; border-radius: 999px; font-size: 13px; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.34,1.56,0.64,1); box-shadow: 0 8px 30px rgba(0,0,0,0.2); white-space: nowrap; }
-        .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-        /* KPIs */
-        .kpi-strip { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 20px; animation: fadeUp 0.5s 0.08s ease both; }
-        .kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 22px 26px; box-shadow: var(--shadow-sm); transition: box-shadow 0.2s, transform 0.2s; }
-        .kpi-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
-        .kpi-label { font-size: 11px; font-weight: 600; letter-spacing: 0.7px; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 8px; }
-        .kpi-value { font-size: 26px; font-weight: 700; letter-spacing: -0.8px; color: var(--text); font-variant-numeric: tabular-nums; }
+        .kpi-strip { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 20px; }
+        .kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 22px 26px; box-shadow: var(--shadow-sm); }
+        .kpi-label { font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 8px; letter-spacing: 0.5px;}
+        .kpi-value { font-size: 26px; font-weight: 700; letter-spacing: -0.8px; font-variant-numeric: tabular-nums; }
         .kpi-value.accent { color: var(--accent); }
 
-        /* Filters */
-        .filters-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 16px; animation: fadeUp 0.5s 0.12s ease both; }
+        .filters-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 16px; }
         .search-wrap { position: relative; flex: 1; min-width: 250px; }
-        .search-icon-el { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-dim); pointer-events: none; transition: color 0.2s; }
-        .control-input { width: 100%; padding: 12px 16px; font-size: 14px; font-family: inherit; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-md); color: var(--text); outline: none; box-shadow: var(--shadow-sm); transition: border-color 0.2s, box-shadow 0.2s; }
-        #searchBar { padding-left: 42px; padding-right: 36px; cursor: text; }
-        .control-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow), var(--shadow-sm); }
-        .clear-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; border-radius: 50%; border: none; background: rgba(0,0,0,0.06); color: var(--text-secondary); font-size: 10px; font-weight: bold; cursor: pointer; display: none; align-items: center; justify-content: center; z-index: 5; }
-        .clear-btn:hover { background: rgba(0,0,0,0.12); color: var(--text); }
-        .shipment-wrap { min-width: 160px; } .preset-wrap { min-width: 140px; } .date-wrap { display: flex; align-items: center; gap: 8px; }
-        .date-sep { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
-        .reset-link { background: none; border: none; color: var(--accent); font-size: 13px; font-weight: 500; cursor: pointer; padding: 8px; margin-left: 8px; display: none; }
-        .reset-link:hover { text-decoration: underline; text-underline-offset: 2px; }
-        #stats { font-size: 12px; color: var(--text-dim); white-space: nowrap; font-variant-numeric: tabular-nums; margin-left: auto; }
+        .search-icon-el { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-dim); pointer-events: none; }
+        .control-input { width: 100%; padding: 12px 16px; font-size: 14px; font-family: inherit; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-md); color: var(--text); outline: none; transition: border-color 0.2s; }
+        #searchBar { padding-left: 42px; padding-right: 36px; }
+        .control-input:focus { border-color: var(--accent); }
+        .clear-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; border-radius: 50%; border: none; background: rgba(0,0,0,0.06); cursor: pointer; display: none; align-items: center; justify-content: center; }
 
-        /* Table */
-        .table-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow-md); animation: fadeUp 0.5s 0.16s ease both; }
+        /* Supplier Summary Card - READDED */
+        #supplierSummary {
+            display: none; background: var(--accent-dim); border: 1px solid rgba(0,102,204,0.18);
+            border-left: 4px solid var(--accent); border-radius: var(--r-lg);
+            padding: 24px; margin-bottom: 16px; box-shadow: var(--shadow-sm);
+        }
+        #sumName { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 16px; }
+        .summary-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 20px; }
+        .stat-box span { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--accent); margin-bottom: 5px; letter-spacing: 0.5px; }
+        .stat-box strong { font-size: 17px; font-weight: 600; color: var(--text); }
+
+        .table-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow-md); }
         .table-wrapper { overflow: auto; max-height: 55vh; }
-        .table-wrapper::-webkit-scrollbar { width: 5px; height: 5px; }
-        .table-wrapper::-webkit-scrollbar-thumb { background: var(--bg2); border-radius: 10px; }
         table { width: 100%; border-collapse: separate; border-spacing: 0; white-space: nowrap; }
-        th { background: rgba(248,248,250,0.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); color: var(--text-secondary); font-size: 11px; font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; text-align: left; padding: 12px 18px; position: sticky; top: 0; z-index: 10; cursor: pointer; border-bottom: 1px solid var(--border-strong); user-select: none; }
-        th:hover { color: var(--text); background: rgba(232,232,237,0.98); }
-        th .sort-arrow { margin-left: 4px; opacity: 0.3; font-size: 9px; }
-        td { padding: 12px 18px; border-bottom: 1px solid rgba(0,0,0,0.04); font-size: 13px; color: var(--text-secondary); vertical-align: middle; }
-        tr:hover td { background: var(--surface2); }
-        .text-main { color: var(--text); font-weight: 500; }
+        th { background: rgba(248,248,250,0.96); color: var(--text-secondary); font-size: 11px; font-weight: 600; text-transform: uppercase; text-align: left; padding: 12px 18px; position: sticky; top: 0; z-index: 10; cursor: pointer; border-bottom: 1px solid var(--border-strong); }
+        td { padding: 12px 18px; border-bottom: 1px solid rgba(0,0,0,0.04); font-size: 13px; }
         .invoice-tag { font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--text); }
-        .hsn-pill { font-family: var(--mono); font-size: 11px; background: var(--bg); border: 1px solid var(--border-strong); color: var(--text-secondary); padding: 2px 8px; border-radius: 6px; }
-        .rate-val, .amount-val { font-family: var(--mono); font-size: 13px; color: var(--text); }
-        .amount-val { font-weight: 700; }
-        .item-link { color: var(--accent); cursor: pointer; font-weight: 500; }
-        .item-link:hover { opacity: 0.7; text-decoration: underline; text-underline-offset: 2px; }
+        .amount-val { font-family: var(--mono); font-weight: 700; }
         .type-pill { display: inline-flex; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; }
         .tag-export  { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
         .tag-domestic{ background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
-        .skeleton-row td { background: linear-gradient(90deg,#f5f5f7 25%,#eaeaef 50%,#f5f5f7 75%); background-size: 200% 100%; animation: shimmer 1.6s ease infinite; }
-        @keyframes shimmer { from{background-position:200% 0} to{background-position:-200% 0} }
 
-        /* Modals */
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 200; justify-content: center; align-items: center; padding: 20px; opacity: 0; transition: opacity 0.25s ease; }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); z-index: 200; justify-content: center; align-items: center; padding: 20px; opacity: 0; transition: opacity 0.25s; }
         .modal-overlay.active { display: flex; opacity: 1; }
-        .modal-content { background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-xl); padding: 34px; width: 860px; max-width: 100%; box-shadow: var(--shadow-lg); position: relative; transform: scale(0.95) translateY(10px); transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1); max-height: 90vh; overflow-y: auto; }
-        .modal-overlay.active .modal-content { transform: scale(1) translateY(0); }
-        .modal-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:26px; }
-        .modal-title { font-size:22px; font-weight:700; letter-spacing:-0.4px; color:var(--text); }
-        .close-btn { width:30px; height:30px; border-radius:50%; background:var(--bg); border:1px solid var(--border-strong); color:var(--text-secondary); font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition: background 0.2s; }
-        .close-btn:hover { background:var(--bg2); color:var(--text); }
-
-        /* Form Styles */
+        .modal-content { background: var(--surface); border-radius: var(--r-xl); padding: 34px; width: 900px; max-width: 100%; max-height: 90vh; overflow-y: auto; transform: translateY(10px); transition: transform 0.25s; }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-        .form-group { margin-bottom: 16px; }
-        .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-label { display: block; font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; }
         .calc-panel { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 24px; }
-        .calc-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; color: var(--text-secondary); }
-        .calc-row.total { border-top: 1px solid var(--border-strong); padding-top: 12px; margin-top: 12px; font-weight: 700; color: var(--text); font-size: 18px; }
-        .calc-val { font-family: var(--mono); color: var(--text); font-weight: 500; }
-        
-        @keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+        .calc-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
+        .calc-row.total { border-top: 1px solid var(--border-strong); padding-top: 12px; margin-top: 12px; font-weight: 700; font-size: 18px; }
+        .close-btn { width:30px; height:30px; border-radius:50%; border:none; cursor:pointer; }
     </style>
 </head>
 <body>
 
 <div class="topbar"></div>
 <div class="container">
-
     <div class="header">
         <div class="header-left">
             <h1>Invoice Dashboard</h1>
-            <p class="subtitle">Secure Supabase Engine · Real-time view</p>
+            <p class="subtitle">Secure Supabase Engine · Surat, Gujarat</p>
         </div>
         <div class="header-right">
-            <div class="live-badge">
-                <div class="live-dot" id="liveDot"></div>
-                <span id="liveText">Connecting…</span>
-            </div>
-            <button class="btn btn-secondary" id="exportBtn" onclick="exportToCSV()">Export CSV</button>
+            <div class="live-badge"><div class="live-dot" id="liveDot"></div><span id="liveText">Connecting…</span></div>
+            <button class="btn btn-secondary" onclick="exportToCSV()">Export CSV</button>
             <button class="btn btn-primary" onclick="openNewInvoiceModal()">+ New Invoice</button>
         </div>
     </div>
@@ -168,33 +126,30 @@
 
     <div class="filters-row">
         <div class="search-wrap">
-            <svg class="search-icon-el" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            <input type="text" id="searchBar" class="control-input" placeholder="Search (Press '/' to focus)…" autocomplete="off" disabled>
+            <input type="text" id="searchBar" class="control-input" placeholder="Search Supplier or Invoice…" autocomplete="off">
             <button id="clearSearchBtn" class="clear-btn">✕</button>
         </div>
-        <div class="shipment-wrap">
-            <select id="shipmentFilter" class="control-input" disabled><option value="">All Shipments</option></select>
-        </div>
-        <div class="preset-wrap">
-            <select id="datePreset" class="control-input" disabled>
-                <option value="">Custom Date...</option>
-                <option value="thisMonth">This Month</option>
-                <option value="lastMonth">Last Month</option>
-                <option value="ytd">Year to Date</option>
-            </select>
-        </div>
         <div class="date-wrap">
-            <input type="date" id="dateFrom" class="control-input" disabled>
+            <input type="date" id="dateFrom" class="control-input">
             <span class="date-sep">to</span>
-            <input type="date" id="dateTo" class="control-input" disabled>
+            <input type="date" id="dateTo" class="control-input">
         </div>
-        <button id="resetFiltersBtn" class="reset-link">Reset Filters</button>
         <div id="stats">Awaiting data…</div>
+    </div>
+
+    <div id="supplierSummary">
+        <h3 id="sumName">Supplier</h3>
+        <div class="summary-grid">
+            <div class="stat-box"><span>Unique Invoices</span><strong id="sumCount">0</strong></div>
+            <div class="stat-box"><span>Total Spend</span><strong id="sumSpend">₹0</strong></div>
+            <div class="stat-box"><span>Most Recent Order</span><strong id="sumDate">—</strong></div>
+            <div class="stat-box"><span>Top Item Bought</span><strong id="sumItem" style="font-size:13px; white-space:normal;">—</strong></div>
+        </div>
     </div>
 
     <div class="table-card">
         <div class="table-wrapper">
-            <table id="dataTable">
+            <table>
                 <thead><tr id="tableHeader"></tr></thead>
                 <tbody id="tableBody"></tbody>
             </table>
@@ -202,57 +157,41 @@
     </div>
 </div>
 
-<div class="toast" id="toast"></div>
-
 <div class="modal-overlay" id="formModal" onclick="if(event.target===this) closeFormModal()">
-    <div class="modal-content" style="width: 900px;">
-        <div class="modal-header">
-            <div>
-                <div class="modal-title">New Invoice Entry</div>
-                <div style="font-size:13px; color:var(--text-secondary); margin-top:4px;">Securely calculate and push to Supabase</div>
-            </div>
+    <div class="modal-content">
+        <div style="display:flex; justify-content:space-between; margin-bottom:24px;">
+            <h2 style="letter-spacing:-0.5px">New Invoice Entry</h2>
             <button class="close-btn" onclick="closeFormModal()">✕</button>
         </div>
-        
         <div class="form-grid">
             <div>
-                <div class="form-group">
+                <div class="form-group" style="margin-bottom:15px">
                     <label class="form-label">Supplier Name</label>
-                    <input type="text" id="inSupplier" class="control-input" placeholder="e.g., NARENDRA STATIONERS">
+                    <input type="text" id="inSupplier" class="control-input" placeholder="Enter Company Name">
                 </div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
-                    <div class="form-group">
-                        <label class="form-label">Invoice No.</label>
-                        <input type="text" id="inInvoice" class="control-input" placeholder="INV-001">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Date</label>
-                        <input type="date" id="inDate" class="control-input">
-                    </div>
+                <div class="form-group" style="margin-bottom:15px">
+                    <label class="form-label">GSTIN of Supplier (Optional if existing)</label>
+                    <input type="text" id="inGstin" class="control-input" placeholder="24XXXXXXXXXXXXX">
                 </div>
-                <div class="form-group">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px">
+                    <div><label class="form-label">Invoice No.</label><input type="text" id="inInvoice" class="control-input"></div>
+                    <div><label class="form-label">Date</label><input type="date" id="inDate" class="control-input"></div>
+                </div>
+                <div class="form-group" style="margin-bottom:15px">
                     <label class="form-label">Item Description</label>
-                    <input type="text" id="inItem" class="control-input" placeholder="Raw Materials...">
+                    <input type="text" id="inItem" class="control-input">
                 </div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
-                    <div class="form-group">
-                        <label class="form-label">Quantity</label>
-                        <input type="number" id="inQty" class="control-input" value="0" oninput="liveCalc()">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Rate (₹)</label>
-                        <input type="number" id="inRate" class="control-input" value="0" oninput="liveCalc()">
-                    </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px">
+                    <div><label class="form-label">Quantity</label><input type="number" id="inQty" class="control-input" oninput="liveCalc()"></div>
+                    <div><label class="form-label">Rate (₹)</label><input type="number" id="inRate" class="control-input" oninput="liveCalc()"></div>
                 </div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
-                    <div class="form-group">
-                        <label class="form-label">Discount (₹)</label>
-                        <input type="number" id="inDiscount" class="control-input" value="0" oninput="liveCalc()">
-                    </div>
-                    <div class="form-group">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px">
+                    <div><label class="form-label">Discount (₹)</label><input type="number" id="inDiscount" class="control-input" value="0" oninput="liveCalc()"></div>
+                    <div>
                         <label class="form-label">GST %</label>
                         <select id="inGstPct" class="control-input" onchange="liveCalc()">
-                            <option value="0">0%</option>
+                            <option value="0">0.00%</option>
+                            <option value="0.10">0.10% (Export)</option>
                             <option value="5">5%</option>
                             <option value="12">12%</option>
                             <option value="18" selected>18%</option>
@@ -260,30 +199,15 @@
                         </select>
                     </div>
                 </div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
-                    <div class="form-group">
-                        <label class="form-label">Shipment No.</label>
-                        <input type="text" id="inShipment" class="control-input">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Type</label>
-                        <select id="inType" class="control-input">
-                            <option value="DOMESTIC">DOMESTIC</option>
-                            <option value="EXPORT">EXPORT</option>
-                        </select>
-                    </div>
-                </div>
             </div>
-            
             <div class="calc-panel">
-                <h4 style="margin:0 0 20px 0; font-size:16px;">Live Calculation</h4>
-                <div class="calc-row"><span>Gross Amount (Qty × Rate)</span><span class="calc-val" id="calcGross">₹0</span></div>
-                <div class="calc-row"><span>Less Discount</span><span class="calc-val" style="color:var(--text-dim)" id="calcDiscount">- ₹0</span></div>
-                <div class="calc-row"><span>Net Taxable Amount</span><span class="calc-val" style="color:var(--accent)" id="calcTaxable">₹0</span></div>
-                <div class="calc-row"><span>GST Amount</span><span class="calc-val" id="calcGstAmount">₹0</span></div>
-                <div class="calc-row total"><span>Total Payable</span><span class="calc-val" id="calcTotal">₹0</span></div>
-                
-                <button class="btn btn-primary" style="width:100%; justify-content:center; padding:14px; margin-top:30px; font-size:15px;" id="saveBtn" onclick="saveToDatabase()">Save Invoice securely</button>
+                <h4 style="margin-bottom:20px">Live Calculation</h4>
+                <div class="calc-row"><span>Gross Amount</span><span id="calcGross">₹0</span></div>
+                <div class="calc-row"><span>Discount</span><span id="calcDisc">- ₹0</span></div>
+                <div class="calc-row" style="color:var(--accent); font-weight:600"><span>Net Taxable</span><span id="calcTaxable">₹0</span></div>
+                <div class="calc-row"><span>GST Amount</span><span id="calcGst">₹0</span></div>
+                <div class="calc-row total"><span>Total Payable</span><span id="calcTotal">₹0</span></div>
+                <button class="btn btn-primary" id="saveBtn" style="width:100%; margin-top:30px; padding:15px; justify-content:center" onclick="saveToDatabase()">Save to Supabase</button>
             </div>
         </div>
     </div>
@@ -291,358 +215,172 @@
 
 <div class="modal-overlay" id="chartModal" onclick="if(event.target===this) closeModal()">
     <div class="modal-content">
-        <div class="modal-header">
-            <div><div class="modal-title" id="chartTitle">Price History</div><div style="font-size:13px; color:var(--text-secondary); margin-top:3px;">Hover points to view Supplier & Date</div></div>
-            <button class="close-btn" onclick="closeModal()">✕</button>
-        </div>
-        <canvas id="priceChart" height="90"></canvas>
+        <canvas id="priceChart"></canvas>
     </div>
 </div>
 
 <script>
-    // ------------------------------------------------------------------
-    // THE NEW DATABASE ENGINE (SUPABASE)
-    // ------------------------------------------------------------------
     const SUPABASE_URL = "https://ssiaeejsqoxfwjnaedgn.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNzaWFlZWpzcW94ZndqbmFlZGduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4NDg0NzIsImV4cCI6MjA5MDQyNDQ3Mn0.e7Nxs_bSs146z_b2RpL396tT3hHIo4zO2Dp4zDbIP2E";
     
-    let rawData=[], currentData=[], sortCol=null, sortAsc=true, priceChartInstance=null;
-
-    const columns = [
-        "SI No","Invoice No.","Date","Name of the supplier","GSTIN of the supplier",
-        "Description of Goods","HSN/SAC","Quantity","UNIT","Rate",
-        "TAXABLE AMOUNT","GST%","GST","TOTAL AMOUNT",
-        "SHIPMENT NO.","SHIPMENT GROUP","EXPORT HSN","EXPORT/DOMESTIC"
-    ];
+    let rawData=[], currentData=[], priceChartInstance=null;
+    const columns = ["SI No","Invoice No.","Date","Name of the supplier","GSTIN of the supplier","Description of Goods","HSN/SAC","Quantity","UNIT","Rate","TAXABLE AMOUNT","GST%","GST","TOTAL AMOUNT","SHIPMENT NO.","EXPORT/DOMESTIC"];
 
     const headerRow = document.getElementById('tableHeader');
-    columns.forEach(col => {
-        const th = document.createElement('th');
-        th.innerHTML = `${col}<span class="sort-arrow">↕</span>`;
-        th.onclick = () => sortTable(col, th);
-        headerRow.appendChild(th);
-    });
+    columns.forEach(col => { const th = document.createElement('th'); th.textContent = col; th.onclick = () => sortTable(col); headerRow.appendChild(th); });
 
-    const tbody = document.getElementById('tableBody');
-    for (let i=0; i<8; i++) {
-        const tr = document.createElement('tr'); tr.className='skeleton-row';
-        tr.innerHTML = columns.map(()=>`<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>`).join('');
-        tbody.appendChild(tr);
-    }
-
-    function showToast(msg, icon='✓') {
-        const t = document.getElementById('toast');
-        t.innerHTML = `<span style="opacity:.7">${icon}</span>&nbsp;${msg}`;
-        t.classList.add('visible'); setTimeout(()=>t.classList.remove('visible'), 2800);
-    }
-
-    // Data Sanitizer
     function cleanNumber(val) { return parseFloat(String(val).replace(/[^0-9.-]+/g, "")) || 0; }
     function cleanDate(dateStr) {
-        if (!dateStr) return 0; const p = String(dateStr).split('-'); if (p.length !== 3) return 0;
+        if (!dateStr) return 0; const p = String(dateStr).split('-'); 
         return p[0].length === 4 ? new Date(p[0], p[1]-1, p[2]).getTime() : new Date(p[2], p[1]-1, p[0]).getTime();
     }
-    function normalizeData(data) {
-        return data.map(row => ({
-            ...row,
-            _num_tax: cleanNumber(row["TAXABLE AMOUNT"]), _num_gst: cleanNumber(row["GST"]),
-            _num_total: cleanNumber(row["TOTAL AMOUNT"]), _num_rate: cleanNumber(row["Rate"]),
-            _num_qty: cleanNumber(row["Quantity"]), _ts_date: cleanDate(row["Date"])
-        }));
+
+    async function fetchData() {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/invoices?select=*`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
+        const data = await res.json();
+        rawData = data.map(r => ({ ...r, _num_tax: cleanNumber(r["TAXABLE AMOUNT"]), _num_gst: cleanNumber(r["GST"]), _num_total: cleanNumber(r["TOTAL AMOUNT"]), _num_rate: cleanNumber(r["Rate"]), _ts_date: cleanDate(r["Date"]) }));
+        currentData = [...rawData];
+        document.querySelectorAll('.btn').forEach(b => b.style.display='flex');
+        document.getElementById('liveDot').classList.add('connected');
+        document.getElementById('liveText').textContent = 'Live';
+        applyFilters();
     }
 
-    // INITIAL FETCH FROM SUPABASE
-    window.onload = async function() {
-        document.getElementById('inDate').valueAsDate = new Date(); // Prep form
-        
-        try {
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/invoices?select=*`, {
-                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-            });
-            
-            if (!response.ok) throw new Error("Database error");
-            const data = await response.json();
-            
-            rawData = normalizeData(data);
-            currentData = [...rawData];
-            
-            // Enable UI
-            document.querySelectorAll('.control-input').forEach(el => el.disabled = false);
-            document.querySelectorAll('.btn').forEach(el => el.style.display = 'flex');
-            
-            const shipments = [...new Set(rawData.map(r => String(r["SHIPMENT NO."]||'').trim()).filter(Boolean))].sort();
-            const shipSelect = document.getElementById('shipmentFilter');
-            shipments.forEach(s => { const opt = document.createElement('option'); opt.value = s; opt.textContent = `Shipment: ${s}`; shipSelect.appendChild(opt); });
+    function applyFilters() {
+        const q = document.getElementById('searchBar').value.toLowerCase();
+        const dFrom = document.getElementById('dateFrom').value ? new Date(document.getElementById('dateFrom').value).getTime() : 0;
+        const dTo = document.getElementById('dateTo').value ? new Date(document.getElementById('dateTo').value).getTime() + 86400000 : Infinity;
 
-            document.getElementById('liveText').textContent = 'Live';
-            document.getElementById('liveDot').classList.add('connected');
-            showToast(`${rawData.length} records loaded from Supabase`);
-            processData();
-            
-        } catch (err) {
-            document.getElementById('liveText').textContent = 'Offline';
-            document.getElementById('liveDot').classList.add('error');
-            showToast('Connection error — Check Supabase keys','⚠');
-            tbody.innerHTML = '';
-        }
-    };
+        currentData = rawData.filter(r => {
+            const matchSearch = Object.values(r).some(v => String(v).toLowerCase().includes(q));
+            const matchDate = r._ts_date >= dFrom && r._ts_date <= dTo;
+            return matchSearch && matchDate;
+        });
 
-    // ------------------------------------------------------------------
-    // NEW SMART FORM ENGINE
-    // ------------------------------------------------------------------
-    let liveValues = { gross:0, tax:0, gst:0, total:0 };
+        calculateTotals();
+        renderTable();
+        updateSupplierSummary(q);
+    }
 
-    function openNewInvoiceModal() { document.getElementById('formModal').classList.add('active'); liveCalc(); }
+    function calculateTotals() {
+        let tax=0, gst=0, tot=0;
+        currentData.forEach(r => { tax += r._num_tax; gst += r._num_gst; tot += r._num_total; });
+        document.getElementById('totTax').textContent = "₹" + tax.toLocaleString('en-IN');
+        document.getElementById('totGst').textContent = "₹" + gst.toLocaleString('en-IN');
+        document.getElementById('totAmt').textContent = "₹" + tot.toLocaleString('en-IN');
+    }
+
+    function updateSupplierSummary(query) {
+        const div = document.getElementById('supplierSummary');
+        if (!query || query.length < 3) { div.style.display = 'none'; return; }
+
+        const suppliers = [...new Set(currentData.map(r => r["Name of the supplier"]))];
+        if (suppliers.length !== 1) { div.style.display = 'none'; return; }
+
+        let spend = 0, items = {}, latest = 0, latestStr = '', invCount = new Set();
+        currentData.forEach(r => {
+            spend += r._num_total;
+            invCount.add(r["Invoice No."]);
+            if (r._ts_date > latest) { latest = r._ts_date; latestStr = r["Date"]; }
+            const item = r["Description of Goods"]; items[item] = (items[item] || 0) + 1;
+        });
+
+        document.getElementById('sumName').textContent = suppliers[0];
+        document.getElementById('sumCount').textContent = invCount.size;
+        document.getElementById('sumSpend').textContent = "₹" + spend.toLocaleString('en-IN');
+        document.getElementById('sumDate').textContent = latestStr;
+        document.getElementById('sumItem').textContent = Object.keys(items).sort((a,b) => items[b]-items[a])[0] || '—';
+        div.style.display = 'block';
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = currentData.map(r => `<tr>
+            <td>${r["SI No"] || '—'}</td>
+            <td class="invoice-tag">${r["Invoice No."] || '—'}</td>
+            <td>${r["Date"] || '—'}</td>
+            <td style="font-weight:600">${r["Name of the supplier"] || '—'}</td>
+            <td style="color:var(--text-dim)">${r["GSTIN of the supplier"] || '—'}</td>
+            <td style="color:var(--accent); cursor:pointer" onclick="openChart('${r["Description of Goods"]}')">${r["Description of Goods"] || '—'}</td>
+            <td>${r["HSN/SAC"] || '—'}</td>
+            <td>${r["Quantity"] || '—'}</td>
+            <td>${r["UNIT"] || '—'}</td>
+            <td>₹${r["Rate"] || '0'}</td>
+            <td class="amount-val">₹${r["TAXABLE AMOUNT"] || '0'}</td>
+            <td>${r["GST%"] || '0%'}</td>
+            <td>₹${r["GST"] || '0'}</td>
+            <td class="amount-val">₹${r["TOTAL AMOUNT"] || '0'}</td>
+            <td>${r["SHIPMENT NO."] || '—'}</td>
+            <td><span class="type-pill ${String(r["EXPORT/DOMESTIC"]).includes('EXPORT')?'tag-export':'tag-domestic'}">${r["EXPORT/DOMESTIC"] || '—'}</span></td>
+        </tr>`).join('');
+        document.getElementById('stats').textContent = `${currentData.length} records found`;
+    }
+
+    // FORM LOGIC
+    function openNewInvoiceModal() { document.getElementById('formModal').classList.add('active'); document.getElementById('inDate').valueAsDate = new Date(); }
     function closeFormModal() { document.getElementById('formModal').classList.remove('active'); }
 
-    function formatCurrencyRaw(num) {
-        // Formats as perfect string with commas for DB text columns
-        return new Intl.NumberFormat('en-IN', { maximumFractionDigits: 2, minimumFractionDigits: 2 }).format(num);
-    }
-
     function liveCalc() {
-        const qty = parseFloat(document.getElementById('inQty').value) || 0;
-        const rate = parseFloat(document.getElementById('inRate').value) || 0;
-        const discount = parseFloat(document.getElementById('inDiscount').value) || 0;
-        const gstPct = parseFloat(document.getElementById('inGstPct').value) || 0;
+        const q = parseFloat(document.getElementById('inQty').value) || 0;
+        const r = parseFloat(document.getElementById('inRate').value) || 0;
+        const d = parseFloat(document.getElementById('inDiscount').value) || 0;
+        const gP = parseFloat(document.getElementById('inGstPct').value) || 0;
 
-        liveValues.gross = qty * rate;
-        liveValues.tax = Math.max(0, liveValues.gross - discount);
-        liveValues.gst = liveValues.tax * (gstPct / 100);
-        liveValues.total = liveValues.tax + liveValues.gst;
+        const gross = q * r;
+        const taxable = Math.max(0, gross - d);
+        const gst = taxable * (gP / 100);
+        const total = taxable + gst;
 
-        document.getElementById('calcGross').innerText = "₹" + formatCurrencyRaw(liveValues.gross);
-        document.getElementById('calcDiscount').innerText = "- ₹" + formatCurrencyRaw(discount);
-        document.getElementById('calcTaxable').innerText = "₹" + formatCurrencyRaw(liveValues.tax);
-        document.getElementById('calcGstAmount').innerText = "₹" + formatCurrencyRaw(liveValues.gst);
-        document.getElementById('calcTotal').innerText = "₹" + formatCurrencyRaw(liveValues.total);
+        document.getElementById('calcGross').textContent = "₹" + gross.toLocaleString('en-IN');
+        document.getElementById('calcDisc').textContent = "- ₹" + d.toLocaleString('en-IN');
+        document.getElementById('calcTaxable').textContent = "₹" + taxable.toLocaleString('en-IN');
+        document.getElementById('calcGst').textContent = "₹" + gst.toLocaleString('en-IN');
+        document.getElementById('calcTotal').textContent = "₹" + total.toLocaleString('en-IN');
     }
 
     async function saveToDatabase() {
         const btn = document.getElementById('saveBtn');
-        btn.innerText = "Saving to Server..."; btn.disabled = true;
+        btn.disabled = true; btn.textContent = "Saving...";
 
-        // Create the perfect JSON string matching your exact CSV headers
-        // Generate a random SI No string for the primary key requirement
-        const newInvoice = {
+        const supplier = document.getElementById('inSupplier').value;
+        let gstin = document.getElementById('inGstin').value;
+
+        // Auto-find GSTIN if left blank
+        if (!gstin) {
+            const found = rawData.find(r => r["Name of the supplier"] === supplier);
+            if (found) gstin = found["GSTIN of the supplier"];
+        }
+
+        const payload = {
             "SI No": "INV-" + Date.now(),
-            "Name of the supplier": document.getElementById('inSupplier').value || "Unknown",
-            "Invoice No.": document.getElementById('inInvoice').value || "-",
-            "Date": document.getElementById('inDate').value.split('-').reverse().join('-') || "-", // Format DD-MM-YYYY
-            "Description of Goods": document.getElementById('inItem').value || "-",
+            "Name of the supplier": supplier,
+            "GSTIN of the supplier": gstin || "URD",
+            "Invoice No.": document.getElementById('inInvoice').value,
+            "Date": document.getElementById('inDate').value.split('-').reverse().join('-'),
+            "Description of Goods": document.getElementById('inItem').value,
             "Quantity": document.getElementById('inQty').value,
             "Rate": document.getElementById('inRate').value,
-            "TAXABLE AMOUNT": formatCurrencyRaw(liveValues.tax),
+            "TAXABLE AMOUNT": (cleanNumber(document.getElementById('calcTaxable').textContent)).toFixed(2),
             "GST%": document.getElementById('inGstPct').value + "%",
-            "GST": formatCurrencyRaw(liveValues.gst),
-            "TOTAL AMOUNT": formatCurrencyRaw(liveValues.total),
-            "SHIPMENT NO.": document.getElementById('inShipment').value || "-",
-            "EXPORT/DOMESTIC": document.getElementById('inType').value
+            "GST": (cleanNumber(document.getElementById('calcGst').textContent)).toFixed(2),
+            "TOTAL AMOUNT": (cleanNumber(document.getElementById('calcTotal').textContent)).toFixed(2),
+            "EXPORT/DOMESTIC": (document.getElementById('inGstPct').value == "0.10") ? "EXPORT" : "DOMESTIC"
         };
 
-        try {
-            const res = await fetch(`${SUPABASE_URL}/rest/v1/invoices`, {
-                method: 'POST',
-                headers: {
-                    'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`,
-                    'Content-Type': 'application/json', 'Prefer': 'return=representation'
-                },
-                body: JSON.stringify(newInvoice)
-            });
-
-            if (!res.ok) throw new Error("Insert failed");
-            
-            const savedData = await res.json();
-            
-            // Push to local UI instantly
-            rawData.push(normalizeData(savedData)[0]);
-            applyFilters();
-            
-            showToast("Invoice saved successfully!");
-            closeFormModal();
-            
-            // Reset form
-            document.getElementById('inSupplier').value = '';
-            document.getElementById('inQty').value = '0';
-            document.getElementById('inRate').value = '0';
-            document.getElementById('inDiscount').value = '0';
-            
-        } catch(err) {
-            alert("Error saving to database. Check your connection.");
-        } finally {
-            btn.innerText = "Save Invoice securely"; btn.disabled = false;
-        }
-    }
-
-
-    // ------------------------------------------------------------------
-    // EXISTING DASHBOARD LOGIC (Filters, Table, Chart)
-    // ------------------------------------------------------------------
-    const searchBar = document.getElementById('searchBar');
-    const clearBtn = document.getElementById('clearSearchBtn');
-    const resetBtn = document.getElementById('resetFiltersBtn');
-    const presetSelect = document.getElementById('datePreset');
-    const fromInput = document.getElementById('dateFrom');
-    const toInput = document.getElementById('dateTo');
-
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') { closeModal(); closeFormModal(); }
-        if ((e.metaKey || e.ctrlKey) && e.key === 'f') { e.preventDefault(); searchBar.focus(); }
-        if (e.key === '/' && document.activeElement.tagName !== 'INPUT') { e.preventDefault(); searchBar.focus(); }
-    });
-
-    searchBar.addEventListener('input', function() { clearBtn.style.display = this.value.length > 0 ? 'flex' : 'none'; applyFilters(); });
-    clearBtn.addEventListener('click', () => { searchBar.value = ''; clearBtn.style.display = 'none'; applyFilters(); searchBar.focus(); });
-
-    presetSelect.addEventListener('change', function() {
-        const val = this.value; const now = new Date();
-        if (val === 'thisMonth') { fromInput.value = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]; toInput.value = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]; }
-        else if (val === 'lastMonth') { fromInput.value = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().split('T')[0]; toInput.value = new Date(now.getFullYear(), now.getMonth(), 0).toISOString().split('T')[0]; }
-        else if (val === 'ytd') { fromInput.value = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0]; toInput.value = now.toISOString().split('T')[0]; }
-        else { fromInput.value = ''; toInput.value = ''; }
-        applyFilters();
-    });
-
-    fromInput.addEventListener('input', () => presetSelect.value = '');
-    toInput.addEventListener('input', () => presetSelect.value = '');
-
-    resetBtn.addEventListener('click', () => { searchBar.value = ''; clearBtn.style.display = 'none'; document.getElementById('shipmentFilter').value = ''; presetSelect.value = ''; fromInput.value = ''; toInput.value = ''; applyFilters(); });
-
-    function applyFilters() {
-        const q = searchBar.value.toLowerCase(); const shipVal = document.getElementById('shipmentFilter').value;
-        const dFrom = fromInput.value; const dTo = toInput.value;
-        resetBtn.style.display = (q || shipVal || dFrom || dTo) ? 'inline-block' : 'none';
-
-        let fromTs = dFrom ? new Date(dFrom.split('-')[0], dFrom.split('-')[1]-1, dFrom.split('-')[2]).getTime() : 0;
-        let toTs = dTo ? new Date(dTo.split('-')[0], dTo.split('-')[1]-1, dTo.split('-')[2]).getTime() + 86399999 : Infinity;
-
-        currentData = rawData.filter(row => {
-            const matchSearch = columns.some(col => String(row[col]||'').toLowerCase().includes(q));
-            if (!matchSearch) return false;
-            if (shipVal && String(row["SHIPMENT NO."]||'').trim() !== shipVal) return false;
-            let rowDate = row._ts_date;
-            if (rowDate) { if (rowDate < fromTs || rowDate > toTs) return false; } else if (fromTs > 0 || toTs < Infinity) { return false; }
-            return true;
-        });
-        processData();
-    }
-
-    document.getElementById('shipmentFilter').onchange = applyFilters;
-    fromInput.onchange = applyFilters; toInput.onchange = applyFilters;
-
-    function processData() { calculateTotals(currentData); renderTable(currentData); }
-    function formatINR(n) { return new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(n); }
-
-    function animateNumber(el, target) {
-        const dur=550; const t0=performance.now();
-        (function tick(now) {
-            const p = Math.min((now-t0)/dur,1), e=1-Math.pow(1-p,3);
-            el.textContent = formatINR(target*e);
-            if (p<1) requestAnimationFrame(tick);
-        })(t0);
-    }
-
-    function calculateTotals(data) {
-        let tax=0,gst=0,total=0;
-        data.forEach(r=>{ tax += r._num_tax; gst += r._num_gst; total += r._num_total; });
-        animateNumber(document.getElementById('totTax'),tax); animateNumber(document.getElementById('totGst'),gst); animateNumber(document.getElementById('totAmt'),total);
-    }
-
-    function sortTable(col, thEl) {
-        sortAsc = sortCol===col ? !sortAsc : true; sortCol = col;
-        document.querySelectorAll('th .sort-arrow').forEach(a=>{a.textContent='↕';a.style.opacity='0.3';});
-        if(thEl){const a=thEl.querySelector('.sort-arrow');a.textContent=sortAsc?'↑':'↓';a.style.opacity='0.8';}
-        
-        currentData.sort((a,b)=>{
-            if(col==='Date') return sortAsc ? a._ts_date - b._ts_date : b._ts_date - a._ts_date;
-            let numA = null, numB = null;
-            if(col === 'TAXABLE AMOUNT') { numA = a._num_tax; numB = b._num_tax; }
-            if(col === 'GST') { numA = a._num_gst; numB = b._num_gst; }
-            if(col === 'TOTAL AMOUNT') { numA = a._num_total; numB = b._num_total; }
-            if(col === 'Rate') { numA = a._num_rate; numB = b._num_rate; }
-            if(col === 'Quantity') { numA = a._num_qty; numB = b._num_qty; }
-            if (numA !== null && numB !== null) return sortAsc ? numA - numB : numB - numA;
-
-            let va = String(a[col]||''), vb = String(b[col]||'');
-            return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
-        });
-        renderTable(currentData);
-    }
-
-    // Magic Copy Function
-    function copyText(el, text) {
-        navigator.clipboard.writeText(text);
-        showToast(`Copied ${text}`);
-    }
-
-    function renderTable(data) {
-        document.getElementById('stats').textContent=`${data.length.toLocaleString('en-IN')} records`;
-        if(!data.length){ tbody.innerHTML=`<tr><td colspan="${columns.length}" style="text-align:center;padding:60px 20px;color:var(--text-dim);">No records found.</td></tr>`; return; }
-        
-        let html='';
-        data.forEach(row=>{
-            const safeItem=String(row["Description of Goods"]||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
-            const expType=String(row["EXPORT/DOMESTIC"]||'').toUpperCase();
-            const typeTag=expType?`<span class="type-pill ${expType.includes('EXPORT')?'tag-export':'tag-domestic'}">${row["EXPORT/DOMESTIC"]}</span>`:'—';
-            
-            html+=`<tr>
-                <td style="color:var(--text-dim);font-size:11px;font-family:var(--mono)">${row["SI No"]||'—'}</td>
-                <td><span class="invoice-tag item-link" onclick="copyText(this, '${row["Invoice No."]}')" title="Click to copy">${row["Invoice No."]||'—'}</span></td>
-                <td style="font-family:var(--mono);font-size:12px">${row["Date"]||'—'}</td>
-                <td><span class="text-main">${row["Name of the supplier"]||'—'}</span></td>
-                <td style="font-family:var(--mono);font-size:11px;color:var(--text-dim)">${row["GSTIN of the supplier"]||'—'}</td>
-                <td><span class="item-link" onclick="openChart('${safeItem}')">${row["Description of Goods"]||'—'}</span></td>
-                <td><span class="hsn-pill">${row["HSN/SAC"]||'—'}</span></td>
-                <td style="text-align:right">${row["Quantity"]||'—'}</td>
-                <td style="color:var(--text-secondary)">${row["UNIT"]||'—'}</td>
-                <td><span class="rate-val">₹${row["Rate"]||'0'}</span></td>
-                <td style="font-family:var(--mono);font-size:12px">₹${row["TAXABLE AMOUNT"]||'0'}</td>
-                <td style="color:var(--text-secondary)">${row["GST%"]||'—'}</td>
-                <td style="font-family:var(--mono);font-size:12px">₹${row["GST"]||'0'}</td>
-                <td><span class="amount-val">₹${row["TOTAL AMOUNT"]||'0'}</span></td>
-                <td style="font-family:var(--mono);font-size:12px;color:var(--text-dim)">${row["SHIPMENT NO."]||'—'}</td>
-                <td style="color:var(--text-secondary)">${row["SHIPMENT GROUP"]||'—'}</td>
-                <td style="font-family:var(--mono);font-size:12px;color:var(--text-dim)">${row["EXPORT HSN"]||'—'}</td>
-                <td>${typeTag}</td>
-            </tr>`;
-        });
-        tbody.innerHTML=html;
-    }
-
-    function exportToCSV() {
-        if(!currentData.length){showToast('No data to export','⚠');return;}
-        const csv = [columns.join(",")];
-        currentData.forEach(row => {
-            csv.push(columns.map(col => `"${String(row[col]||'').replace(/"/g, '""')}"`).join(","));
-        });
-        const blob=new Blob([csv.join('\n')],{type:'text/csv;charset=utf-8;'});
-        const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='Filtered_Invoices.csv'; a.click();
-        showToast('Export downloaded');
-    }
-
-    function openChart(itemName) {
-        if(!itemName) return;
-        const history=rawData.filter(r=>String(r["Description of Goods"])===itemName);
-        history.sort((a,b)=> a._ts_date - b._ts_date);
-        
-        const labels=[], prices=[], suppliers=[];
-        history.forEach(r=>{
-            if(r["Date"] && r._num_rate){ labels.push(r["Date"]); prices.push(r._num_rate); suppliers.push(String(r["Name of the supplier"]||'Unknown Supplier')); }
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/invoices`, {
+            method: 'POST',
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+            body: JSON.stringify(payload)
         });
 
-        document.getElementById('chartTitle').textContent=itemName;
-        document.getElementById('chartModal').classList.add('active');
-        const ctx=document.getElementById('priceChart').getContext('2d');
-        if(priceChartInstance) priceChartInstance.destroy();
-        
-        priceChartInstance=new Chart(ctx,{
-            type:'line',
-            data:{labels, datasets:[{ label:'Rate (₹)',data:prices, borderColor:'#0066CC', backgroundColor:ctx2=>{const g=ctx2.chart.ctx.createLinearGradient(0,0,0,240);g.addColorStop(0,'rgba(0,102,204,0.12)');g.addColorStop(1,'rgba(0,102,204,0)');return g;}, borderWidth:2,pointBackgroundColor:'#0066CC',pointBorderColor:'#fff', pointBorderWidth:2,pointRadius:5,pointHoverRadius:7,fill:true,tension:0.35 }]},
-            options:{ responsive:true, plugins:{ legend:{display:false}, tooltip:{ backgroundColor:'#1D1D1F',titleColor:'#98989F',bodyColor:'#F5F5F7', borderColor:'rgba(0,0,0,0.1)',borderWidth:1,padding:12,displayColors:false, titleFont:{size:11},bodyFont:{family:"'DM Mono',monospace",size:13,weight:'500'}, callbacks:{ title: c => `${labels[c[0].dataIndex]} • ${suppliers[c[0].dataIndex]}`, label:c=>`₹ ${c.parsed.y.toLocaleString('en-IN')}` } } }, scales:{ y:{grid:{color:'rgba(0,0,0,0.05)',drawBorder:false},ticks:{color:'#6E6E73',font:{family:"'DM Mono',monospace",size:11},callback:v=>'₹'+v.toLocaleString('en-IN')}}, x:{grid:{display:false},ticks:{color:'#6E6E73',font:{size:10},maxRotation:35,minRotation:25}} } }
-        });
+        if (res.ok) { alert("Saved!"); fetchData(); closeFormModal(); }
+        btn.disabled = false; btn.textContent = "Save to Supabase";
     }
 
-    function closeModal(){ document.getElementById('chartModal').classList.remove('active'); }
+    window.onload = fetchData;
+    document.getElementById('searchBar').oninput = applyFilters;
+    document.getElementById('dateFrom').onchange = applyFilters;
+    document.getElementById('dateTo').onchange = applyFilters;
 </script>
 </body>
 </html>
