@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -162,7 +161,7 @@
         .clear-btn:hover { background: rgba(0,0,0,0.12); color: var(--text); }
 
         .shipment-wrap { min-width: 160px; }
-        .preset-wrap { min-width: 140px; }
+        .preset-wrap { min-width: 180px; }
         .date-wrap { display: flex; align-items: center; gap: 8px; }
         .date-sep { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
         
@@ -260,6 +259,8 @@
             max-height: 90vh; overflow-y: auto;
         }
         .modal-overlay.active .modal-content { transform: scale(1) translateY(0); }
+        .modal-content::-webkit-scrollbar { width: 6px; }
+        .modal-content::-webkit-scrollbar-thumb { background: var(--text-dim); border-radius: 10px; }
         
         .modal-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:26px; }
         .modal-title { font-size:22px; font-weight:700; letter-spacing:-0.4px; color:var(--text); }
@@ -300,6 +301,12 @@
 
 <datalist id="supplierList"></datalist>
 <datalist id="itemList"></datalist>
+<datalist id="shipmentModeList">
+    <option value="No Shipment">
+    <option value="Airway">
+    <option value="Factory">
+    <option value="Courier">
+</datalist>
 
 <div class="topbar"></div>
 
@@ -348,6 +355,7 @@
                 <option value="thisMonth">This Month</option>
                 <option value="lastMonth">Last Month</option>
                 <option value="ytd">Year to Date</option>
+                <option value="fy">This Financial Year</option>
             </select>
         </div>
 
@@ -399,10 +407,10 @@
             <div>
                 <div class="form-group">
                     <label class="form-label">Supplier Name</label>
-                    <input type="text" id="inSupplier" class="control-input" list="supplierList" placeholder="Start typing to search...">
+                    <input type="text" id="inSupplier" class="control-input" list="supplierList" placeholder="Start typing to search..." oninput="autoFillGSTIN()">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">GSTIN of Supplier (Optional if existing)</label>
+                    <label class="form-label">GSTIN of Supplier</label>
                     <input type="text" id="inGstin" class="control-input" placeholder="24XXXXXXXXXXXXX">
                 </div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
@@ -418,6 +426,16 @@
                 <div class="form-group">
                     <label class="form-label">Item Description</label>
                     <input type="text" id="inItem" class="control-input" list="itemList" placeholder="Start typing to search...">
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+                    <div class="form-group">
+                        <label class="form-label">HSN/SAC Code</label>
+                        <input type="text" id="inHsn" class="control-input" placeholder="e.g. 7604">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">UNIT</label>
+                        <input type="text" id="inUnit" class="control-input" placeholder="e.g. PCS, KGS">
+                    </div>
                 </div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
                     <div class="form-group">
@@ -445,6 +463,23 @@
                             <option value="28">28%</option>
                         </select>
                     </div>
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+                    <div class="form-group">
+                        <label class="form-label">Shipment No / Mode</label>
+                        <input type="text" id="inShipment" class="control-input" list="shipmentModeList" placeholder="120, courier, factory...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Type</label>
+                        <select id="inType" class="control-input">
+                            <option value="DOMESTIC">DOMESTIC</option>
+                            <option value="EXPORT">EXPORT</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Export HSN</label>
+                    <input type="text" id="inExportHsn" class="control-input" placeholder="Only required for exports...">
                 </div>
             </div>
             
@@ -551,6 +586,19 @@
         document.getElementById('itemList').innerHTML = items.map(i => `<option value="${i}">`).join('');
     }
 
+    // AUTO-FILL GSTIN LOGIC
+    function autoFillGSTIN() {
+        const supplierName = document.getElementById('inSupplier').value.trim().toLowerCase();
+        if (!supplierName) return;
+        
+        // Search memory for existing supplier
+        const match = rawData.find(r => String(r["Name of the supplier"]||'').trim().toLowerCase() === supplierName);
+        
+        if (match && match["GSTIN of the supplier"] && match["GSTIN of the supplier"] !== "-" && match["GSTIN of the supplier"] !== "URD") {
+            document.getElementById('inGstin').value = match["GSTIN of the supplier"];
+        }
+    }
+
     window.onload = async function() {
         document.getElementById('inDate').valueAsDate = new Date();
         
@@ -628,6 +676,7 @@
         const supplier = document.getElementById('inSupplier').value || "Unknown";
         let gstin = document.getElementById('inGstin').value;
 
+        // Final safety check to auto-fill GSTIN if user forgot
         if (!gstin) {
             const found = rawData.find(r => r["Name of the supplier"] === supplier);
             if (found && found["GSTIN of the supplier"]) gstin = found["GSTIN of the supplier"];
@@ -640,18 +689,18 @@
             "Invoice No.": document.getElementById('inInvoice').value || "-",
             "Date": document.getElementById('inDate').value.split('-').reverse().join('-') || "-",
             "Description of Goods": document.getElementById('inItem').value || "-",
-            "HSN/SAC": "-",
+            "HSN/SAC": document.getElementById('inHsn').value || "-",
             "Quantity": document.getElementById('inQty').value,
-            "UNIT": "-",
+            "UNIT": document.getElementById('inUnit').value || "-",
             "Rate": document.getElementById('inRate').value,
             "TAXABLE AMOUNT": formatCurrencyRaw(liveValues.tax),
             "GST%": document.getElementById('inGstPct').value + "%",
             "GST": formatCurrencyRaw(liveValues.gst),
             "TOTAL AMOUNT": formatCurrencyRaw(liveValues.total),
-            "SHIPMENT NO.": "-",
+            "SHIPMENT NO.": document.getElementById('inShipment').value || "-",
             "SHIPMENT GROUP": "-",
-            "EXPORT HSN": "-",
-            "EXPORT/DOMESTIC": (document.getElementById('inGstPct').value === "0.10") ? "EXPORT" : "DOMESTIC"
+            "EXPORT HSN": document.getElementById('inExportHsn').value || "-",
+            "EXPORT/DOMESTIC": document.getElementById('inType').value
         };
 
         try {
@@ -675,9 +724,12 @@
             showToast("Invoice saved successfully!");
             closeFormModal();
             
-            // Reset form
+            // Reset form (keeping date, shipment, type intact for quick consecutive entries)
             document.getElementById('inSupplier').value = '';
+            document.getElementById('inGstin').value = '';
+            document.getElementById('inInvoice').value = '';
             document.getElementById('inItem').value = '';
+            document.getElementById('inHsn').value = '';
             document.getElementById('inQty').value = '0';
             document.getElementById('inRate').value = '0';
             document.getElementById('inDiscount').value = '0';
@@ -708,9 +760,26 @@
 
     presetSelect.addEventListener('change', function() {
         const val = this.value; const now = new Date();
-        if (val === 'thisMonth') { fromInput.value = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]; toInput.value = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]; }
-        else if (val === 'lastMonth') { fromInput.value = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().split('T')[0]; toInput.value = new Date(now.getFullYear(), now.getMonth(), 0).toISOString().split('T')[0]; }
-        else if (val === 'ytd') { fromInput.value = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0]; toInput.value = now.toISOString().split('T')[0]; }
+        if (val === 'thisMonth') { 
+            fromInput.value = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]; 
+            toInput.value = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]; 
+        }
+        else if (val === 'lastMonth') { 
+            fromInput.value = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().split('T')[0]; 
+            toInput.value = new Date(now.getFullYear(), now.getMonth(), 0).toISOString().split('T')[0]; 
+        }
+        else if (val === 'ytd') { 
+            fromInput.value = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0]; 
+            toInput.value = now.toISOString().split('T')[0]; 
+        }
+        // INDIAN FINANCIAL YEAR LOGIC
+        else if (val === 'fy') {
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth(); // 0-indexed (April = 3)
+            let startYear = currentMonth >= 3 ? currentYear : currentYear - 1;
+            fromInput.value = new Date(startYear, 3, 1).toISOString().split('T')[0]; // April 1st
+            toInput.value = new Date(startYear + 1, 2, 31).toISOString().split('T')[0]; // March 31st
+        }
         else { fromInput.value = ''; toInput.value = ''; }
         applyFilters();
     });
