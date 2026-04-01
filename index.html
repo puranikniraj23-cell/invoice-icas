@@ -62,6 +62,8 @@
         .btn-secondary:hover { background: var(--surface2); transform: translateY(-1px); }
         .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 2px 10px rgba(0,102,204,0.25); display: flex; }
         .btn-primary:hover { background: #005AB5; box-shadow: 0 4px 16px rgba(0,102,204,0.35); transform: translateY(-1px); }
+        .btn-danger { background: var(--red-bg); color: var(--red); display: flex; }
+        .btn-danger:hover { background: var(--red); color: #fff; }
         .btn:active { transform: scale(0.97); }
 
         .toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-12px); z-index: 300; display: flex; align-items: center; gap: 8px; background: var(--text); color: #fff; padding: 10px 20px; border-radius: 999px; font-size: 13px; font-weight: 500; opacity: 0; pointer-events: none; transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1); box-shadow: 0 8px 30px rgba(0,0,0,0.2); white-space: nowrap; }
@@ -76,16 +78,23 @@
         .kpi-value.accent { color: var(--accent); }
         .kpi-value.danger { color: var(--red); }
 
+        /* UPGRADED: Universal Input Wrappers for "X" Clear Buttons */
+        .input-wrapper { position: relative; display: flex; align-items: center; width: 100%; }
+        .control-input { width: 100%; padding: 12px 16px; padding-right: 36px; font-size: 14px; font-family: inherit; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-md); color: var(--text); outline: none; box-shadow: var(--shadow-sm); transition: all 0.2s; cursor: text; }
+        .control-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow), var(--shadow-sm); }
+        .control-input:disabled { background: var(--bg2); cursor: not-allowed; opacity: 0.7; }
+        .clear-btn { position: absolute; right: 10px; width: 20px; height: 20px; border-radius: 50%; border: none; background: rgba(0,0,0,0.06); color: var(--text-secondary); font-size: 10px; font-weight: bold; cursor: pointer; display: none; align-items: center; justify-content: center; z-index: 5; transition: background 0.2s; }
+        .clear-btn:hover { background: rgba(0,0,0,0.15); color: var(--text); }
+        .input-wrapper:focus-within .clear-btn, .input-wrapper:hover .clear-btn { display: flex; }
+        
+        select.control-input { padding-right: 16px; } /* Dropdowns don't need the X */
+
         /* Filters */
         .filters-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 16px; animation: fadeUp 0.5s 0.12s ease both; }
-        .search-wrap { position: relative; flex: 1; min-width: 250px; }
-        .search-icon-el { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-dim); pointer-events: none; }
+        .search-wrap { flex: 1; min-width: 250px; }
+        #searchBar { padding-left: 42px; }
+        .search-icon-el { position: absolute; left: 16px; color: var(--text-dim); pointer-events: none; z-index: 2; }
         .search-wrap:focus-within .search-icon-el { color: var(--accent); }
-        .control-input { width: 100%; padding: 12px 16px; font-size: 14px; font-family: inherit; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-md); color: var(--text); outline: none; box-shadow: var(--shadow-sm); transition: all 0.2s; cursor: pointer; }
-        #searchBar { padding-left: 42px; padding-right: 36px; cursor: text; }
-        .control-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow), var(--shadow-sm); }
-        .clear-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; border-radius: 50%; border: none; background: rgba(0,0,0,0.06); color: var(--text-secondary); font-size: 10px; font-weight: bold; cursor: pointer; display: none; align-items: center; justify-content: center; z-index: 5; }
-        .clear-btn:hover { background: rgba(0,0,0,0.12); color: var(--text); }
         
         .shipment-wrap { min-width: 140px; } .preset-wrap { min-width: 160px; } .date-wrap { display: flex; align-items: center; gap: 8px; }
         .date-sep { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
@@ -110,13 +119,14 @@
         .chart-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 24px; box-shadow: var(--shadow-md); }
         .chart-box h3 { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 16px; letter-spacing: -0.3px;}
 
-        /* Table & Heavy Scrollbar */
+        /* UPGRADED: Table & Heavy Scrollbar */
         .table-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow-md); animation: fadeUp 0.5s 0.16s ease both; }
         .table-wrapper { overflow: auto; max-height: 60vh; padding-bottom: 12px; }
-        .table-wrapper::-webkit-scrollbar { width: 10px; height: 14px; }
+        .table-wrapper::-webkit-scrollbar { width: 12px; height: 14px; }
         .table-wrapper::-webkit-scrollbar-track { background: var(--surface2); border-radius: 10px; border: 1px solid var(--border); }
         .table-wrapper::-webkit-scrollbar-thumb { background: var(--text-dim); border-radius: 10px; border: 2px solid var(--surface2); }
         .table-wrapper::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+        
         table { width: 100%; border-collapse: separate; border-spacing: 0; white-space: nowrap; }
         th { background: rgba(248,248,250,0.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); color: var(--text-secondary); font-size: 11px; font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; text-align: left; padding: 12px 18px; position: sticky; top: 0; z-index: 10; cursor: pointer; border-bottom: 1px solid var(--border-strong); user-select: none; }
         th:hover { color: var(--text); background: rgba(232,232,237,0.98); }
@@ -194,6 +204,8 @@
 <datalist id="supplierList"></datalist>
 <datalist id="itemList"></datalist>
 <datalist id="shipmentModeList"><option value="No Shipment"><option value="Airway"><option value="Factory"><option value="Courier"></datalist>
+<datalist id="globalInvoiceList"></datalist>
+<datalist id="globalDateList"></datalist>
 
 <div class="topbar"></div>
 
@@ -224,10 +236,10 @@
     </div>
 
     <div class="filters-row">
-        <div class="search-wrap">
+        <div class="search-wrap input-wrapper">
             <svg class="search-icon-el" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             <input type="text" id="searchBar" class="control-input" placeholder="Search (Press '/' to focus)…" autocomplete="off" disabled>
-            <button id="clearSearchBtn" class="clear-btn" title="Clear search">✕</button>
+            <button class="clear-btn" onclick="clearInput(this)">✕</button>
         </div>
         
         <label class="unpaid-toggle">
@@ -247,10 +259,17 @@
                 <option value="fy">This Financial Year</option>
             </select>
         </div>
+        
         <div class="date-wrap">
-            <input type="text" id="dateFrom" class="control-input" placeholder="DD-MM-YYYY" style="width: 120px;" disabled>
+            <div class="input-wrapper" style="width: 120px;">
+                <input type="text" id="dateFrom" class="control-input" placeholder="DD-MM-YYYY" disabled>
+                <button class="clear-btn" onclick="clearInput(this)">✕</button>
+            </div>
             <span class="date-sep">to</span>
-            <input type="text" id="dateTo" class="control-input" placeholder="DD-MM-YYYY" style="width: 120px;" disabled>
+            <div class="input-wrapper" style="width: 120px;">
+                <input type="text" id="dateTo" class="control-input" placeholder="DD-MM-YYYY" disabled>
+                <button class="clear-btn" onclick="clearInput(this)">✕</button>
+            </div>
         </div>
         <button id="resetFiltersBtn" class="reset-link">Reset</button>
         <div id="stats">Awaiting data…</div>
@@ -292,43 +311,86 @@
         </div>
         <div class="form-grid">
             <div>
-                <div class="form-group"><label class="form-label">Supplier Name</label><input type="text" id="inSupplier" class="control-input" list="supplierList" oninput="autoFillGSTIN()"></div>
-                <div class="form-group"><label class="form-label">GSTIN</label><input type="text" id="inGstin" class="control-input"></div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
-                    <div class="form-group"><label class="form-label">Invoice No.</label><input type="text" id="inInvoice" class="control-input"></div>
-                    <div class="form-group"><label class="form-label">Date</label><input type="text" id="inDate" class="control-input" placeholder="DD-MM-YYYY"></div>
+                <div class="form-group">
+                    <label class="form-label">Supplier Name</label>
+                    <div class="input-wrapper"><input type="text" id="inSupplier" class="control-input" list="supplierList" oninput="autoFillGSTIN()"><button class="clear-btn" onclick="clearInput(this)">✕</button></div>
                 </div>
-                <div class="form-group"><label class="form-label">Item Description</label><input type="text" id="inItem" class="control-input" list="itemList"></div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
-                    <div class="form-group"><label class="form-label">HSN/SAC Code</label><input type="text" id="inHsn" class="control-input"></div>
-                    <div class="form-group"><label class="form-label">UNIT</label><input type="text" id="inUnit" class="control-input"></div>
+                <div class="form-group">
+                    <label class="form-label">GSTIN</label>
+                    <div class="input-wrapper"><input type="text" id="inGstin" class="control-input"><button class="clear-btn" onclick="clearInput(this)">✕</button></div>
                 </div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
-                    <div class="form-group"><label class="form-label">Quantity</label><input type="number" id="inQty" class="control-input" value="0" oninput="liveCalc()"></div>
-                    <div class="form-group"><label class="form-label">Rate (₹)</label><input type="number" id="inRate" class="control-input" value="0" oninput="liveCalc()"></div>
+                    <div class="form-group">
+                        <label class="form-label">Invoice No.</label>
+                        <div class="input-wrapper"><input type="text" id="inInvoice" class="control-input"><button class="clear-btn" onclick="clearInput(this)">✕</button></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Date</label>
+                        <div class="input-wrapper"><input type="text" id="inDate" class="control-input" placeholder="DD-MM-YYYY"><button class="clear-btn" onclick="clearInput(this)">✕</button></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Item Description</label>
+                    <div class="input-wrapper"><input type="text" id="inItem" class="control-input" list="itemList"><button class="clear-btn" onclick="clearInput(this)">✕</button></div>
                 </div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
-                    <div class="form-group"><label class="form-label">Discount (₹)</label><input type="number" id="inDiscount" class="control-input" value="0" oninput="liveCalc()"></div>
-                    <div class="form-group"><label class="form-label">GST %</label>
-                        <select id="inGstPct" class="control-input" onchange="liveCalc()"><option value="0">0.00%</option><option value="0.10">0.10%</option><option value="5">5%</option><option value="12">12%</option><option value="18" selected>18%</option><option value="28">28%</option></select>
+                    <div class="form-group">
+                        <label class="form-label">HSN/SAC Code</label>
+                        <div class="input-wrapper"><input type="text" id="inHsn" class="control-input"><button class="clear-btn" onclick="clearInput(this)">✕</button></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">UNIT</label>
+                        <div class="input-wrapper"><input type="text" id="inUnit" class="control-input"><button class="clear-btn" onclick="clearInput(this)">✕</button></div>
                     </div>
                 </div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
-                    <div class="form-group"><label class="form-label">Shipment No</label><input type="text" id="inShipment" class="control-input" list="shipmentModeList"></div>
-                    <div class="form-group"><label class="form-label">Type</label><select id="inType" class="control-input"><option value="DOMESTIC">DOMESTIC</option><option value="EXPORT">EXPORT</option></select></div>
+                    <div class="form-group">
+                        <label class="form-label">Quantity</label>
+                        <div class="input-wrapper"><input type="number" id="inQty" class="control-input" value="0" oninput="liveCalc()"><button class="clear-btn" onclick="clearInput(this)">✕</button></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Rate (₹)</label>
+                        <div class="input-wrapper"><input type="number" id="inRate" class="control-input" value="0" oninput="liveCalc()"><button class="clear-btn" onclick="clearInput(this)">✕</button></div>
+                    </div>
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+                    <div class="form-group">
+                        <label class="form-label">Discount (₹)</label>
+                        <div class="input-wrapper"><input type="number" id="inDiscount" class="control-input" value="0" oninput="liveCalc()"><button class="clear-btn" onclick="clearInput(this)">✕</button></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">GST %</label>
+                        <select id="inGstPct" class="control-input" onchange="liveCalc()"><option value="0">0.00%</option><option value="0.10">0.10%</option><option value="5">5%</option><option value="12">12%</option><option value="18" selected>18%</option><option value="28">28%</option></select>
+                    </div>
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px;">
+                    <div class="form-group">
+                        <label class="form-label">Shipment No</label>
+                        <div class="input-wrapper"><input type="text" id="inShipment" class="control-input" list="shipmentModeList"><button class="clear-btn" onclick="clearInput(this)">✕</button></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Export HSN</label>
+                        <div class="input-wrapper"><input type="text" id="inExportHsn" class="control-input"><button class="clear-btn" onclick="clearInput(this)">✕</button></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Type</label>
+                        <select id="inType" class="control-input"><option value="DOMESTIC">DOMESTIC</option><option value="EXPORT">EXPORT</option></select>
+                    </div>
                 </div>
             </div>
             <div class="calc-panel">
                 <h4 style="margin:0 0 20px 0; font-size:16px;">Live Calculation</h4>
-                <div class="calc-row"><span>Gross Amount</span><span class="calc-val" id="calcGross">₹0</span></div>
-                <div class="calc-row"><span>Discount</span><span class="calc-val" id="calcDiscount">- ₹0</span></div>
-                <div class="calc-row"><span>Net Taxable</span><span class="calc-val" style="color:var(--accent)" id="calcTaxable">₹0</span></div>
-                <div class="calc-row"><span>GST Amount</span><span class="calc-val" id="calcGstAmount">₹0</span></div>
-                <div class="calc-row total"><span>Total Payable</span><span class="calc-val" id="calcTotal">₹0</span></div>
+                <div class="calc-row"><span>Gross Amount</span><span class="calc-val" id="calcGross">₹0.00</span></div>
+                <div class="calc-row"><span>Discount</span><span class="calc-val" id="calcDiscount">- ₹0.00</span></div>
+                <div class="calc-row"><span>Net Taxable</span><span class="calc-val" style="color:var(--accent)" id="calcTaxable">₹0.00</span></div>
+                <div class="calc-row"><span>GST Amount</span><span class="calc-val" id="calcGstAmount">₹0.00</span></div>
+                <div class="calc-row total"><span>Total Payable</span><span class="calc-val" id="calcTotal">₹0.00</span></div>
+                
                 <div style="display: flex; gap: 10px; margin-top: 30px;">
-                    <button class="btn btn-secondary" style="flex: 1; justify-content: center; padding: 14px; font-size: 14px;" onclick="clearProductDetails()">Clear Item</button>
-                    <button class="btn btn-primary" style="flex: 2; justify-content: center; padding: 14px; font-size: 15px;" id="saveBtn" onclick="saveToDatabase()">Save Invoice</button>
+                    <button class="btn btn-secondary" style="flex: 1; justify-content: center; padding: 14px; font-size: 13px;" onclick="clearProductDetails()">Clear Item</button>
+                    <button class="btn btn-danger" style="flex: 1; justify-content: center; padding: 14px; font-size: 13px; background: var(--red-bg); color: var(--red);" onclick="clearEntireForm()">Reset All</button>
                 </div>
+                <button class="btn btn-primary" style="width: 100%; justify-content: center; padding: 14px; margin-top: 10px; font-size: 15px;" id="saveBtn" onclick="saveToDatabase()">Save Invoice</button>
             </div>
         </div>
     </div>
@@ -344,9 +406,10 @@
             <button class="close-btn" onclick="closePaymentModal()">✕</button>
         </div>
         
-        <div id="globalPayInputs" style="display:none; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border-strong);">
-            <div class="form-group" style="margin:0"><label class="form-label">Search Supplier Name</label><input type="text" id="gPaySupplier" class="control-input" list="supplierList" oninput="tryLoadGlobalLedger()" placeholder="Type supplier..."></div>
-            <div class="form-group" style="margin:0"><label class="form-label">Enter Invoice No.</label><input type="text" id="gPayInvoice" class="control-input" oninput="tryLoadGlobalLedger()" placeholder="Type invoice..."></div>
+        <div id="globalPayInputs" style="display:none; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border-strong);">
+            <div class="form-group" style="margin:0"><label class="form-label">Supplier</label><div class="input-wrapper"><input type="text" id="gPaySupplier" class="control-input" list="supplierList" oninput="updateLinkedSearch('pay')" placeholder="Name..."><button class="clear-btn" onclick="clearInput(this)">✕</button></div></div>
+            <div class="form-group" style="margin:0"><label class="form-label">Invoice Date</label><div class="input-wrapper"><input type="text" id="gPayDate" class="control-input" list="globalDateList" oninput="tryLoadGlobalLedger()" placeholder="DD-MM-YYYY"><button class="clear-btn" onclick="clearInput(this)">✕</button></div></div>
+            <div class="form-group" style="margin:0"><label class="form-label">Invoice No.</label><div class="input-wrapper"><input type="text" id="gPayInvoice" class="control-input" list="globalInvoiceList" oninput="tryLoadGlobalLedger()" placeholder="Inv #"><button class="clear-btn" onclick="clearInput(this)">✕</button></div></div>
         </div>
 
         <div class="ledger-summary">
@@ -365,9 +428,8 @@
             </div>
             <div style="flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r-md); padding: 20px;">
                 <h4 style="font-size: 13px; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; letter-spacing: 0.5px;">Log New Payment</h4>
-                <div class="form-group"><label class="form-label">Amount Paid (₹)</label><input type="number" id="payAmount" class="control-input" placeholder="0"></div>
-                <div class="form-group"><label class="form-label">Date of Payment</label><input type="text" id="payDate" class="control-input" placeholder="DD-MM-YYYY"></div>
-                
+                <div class="form-group"><label class="form-label">Amount Paid (₹)</label><div class="input-wrapper"><input type="number" id="payAmount" class="control-input" placeholder="0"><button class="clear-btn" onclick="clearInput(this)">✕</button></div></div>
+                <div class="form-group"><label class="form-label">Date of Payment</label><div class="input-wrapper"><input type="text" id="payDate" class="control-input" placeholder="DD-MM-YYYY"><button class="clear-btn" onclick="clearInput(this)">✕</button></div></div>
                 <button class="btn btn-primary" style="width: 100%; justify-content: center; margin-bottom: 10px;" id="savePayBtn" onclick="savePayment()">Add Payment</button>
                 <button class="btn btn-secondary" style="width: 100%; justify-content: center;" onclick="generateLedgerPDF()">📄 Download Ledger PDF</button>
             </div>
@@ -376,7 +438,7 @@
 </div>
 
 <div class="modal-overlay" id="globalPrintModal" onclick="if(event.target===this) document.getElementById('globalPrintModal').classList.remove('active')">
-    <div class="modal-content" style="width: 500px;">
+    <div class="modal-content" style="width: 600px;">
         <div class="modal-header">
             <div><div class="modal-title">Print Documents</div><div style="font-size:13px; color:var(--text-secondary); margin-top:4px;">Search and generate PDFs instantly</div></div>
             <button class="close-btn" onclick="document.getElementById('globalPrintModal').classList.remove('active')">✕</button>
@@ -385,8 +447,11 @@
             <label class="form-label">Document Type</label>
             <select id="gPrintType" class="control-input"><option value="invoice">Purchase Invoice (Combines all items)</option><option value="ledger">Payment Ledger (Statement of Account)</option></select>
         </div>
-        <div class="form-group"><label class="form-label">Supplier Name</label><input type="text" id="gPrintSupplier" class="control-input" list="supplierList" placeholder="Enter supplier name..."></div>
-        <div class="form-group"><label class="form-label">Invoice No.</label><input type="text" id="gPrintInvoice" class="control-input" placeholder="Enter invoice number..."></div>
+        <div style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px;">
+            <div class="form-group"><label class="form-label">Supplier Name</label><div class="input-wrapper"><input type="text" id="gPrintSupplier" class="control-input" list="supplierList" oninput="updateLinkedSearch('print')" placeholder="Name..."><button class="clear-btn" onclick="clearInput(this)">✕</button></div></div>
+            <div class="form-group"><label class="form-label">Invoice Date</label><div class="input-wrapper"><input type="text" id="gPrintDate" class="control-input" list="globalDateList" placeholder="DD-MM-YYYY"><button class="clear-btn" onclick="clearInput(this)">✕</button></div></div>
+            <div class="form-group"><label class="form-label">Invoice No.</label><div class="input-wrapper"><input type="text" id="gPrintInvoice" class="control-input" list="globalInvoiceList" placeholder="Inv #"><button class="clear-btn" onclick="clearInput(this)">✕</button></div></div>
+        </div>
         <button class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 24px; padding: 14px; font-size: 15px;" onclick="executeGlobalPrint()">Generate PDF</button>
     </div>
 </div>
@@ -396,11 +461,11 @@
 </div>
 
 <div class="modal-overlay" id="pinModal" onclick="if(event.target===this) cancelPin()">
-    <div class="modal-content">
+    <div class="modal-content" style="width: 340px; text-align: center; padding: 40px 30px; position: relative;">
         <button class="close-btn" style="position: absolute; top: 15px; right: 15px;" onclick="cancelPin()">✕</button>
         <div class="pin-icon">🔒</div>
         <h3 style="margin-bottom: 8px;">Admin Lock</h3>
-        <p style="font-size: 13px; color: var(--text-secondary);">Enter 4-Digit PIN to authorize action</p>
+        <p style="font-size: 13px; color: var(--text-secondary);">Enter 4-Digit PIN to authorize</p>
         <input type="password" id="adminPin" class="pin-input" maxlength="4" placeholder="••••" onkeypress="if(event.key==='Enter') submitPin()">
         <div style="display: flex; gap: 10px; margin-top: 10px;">
             <button class="btn btn-secondary" style="flex:1; justify-content:center" onclick="cancelPin()">Cancel</button>
@@ -413,7 +478,7 @@
     // --- DATABASE CONFIG ---
     const SUPABASE_URL = "https://ssiaeejsqoxfwjnaedgn.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNzaWFlZWpzcW94ZndqbmFlZGduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4NDg0NzIsImV4cCI6MjA5MDQyNDQ3Mn0.e7Nxs_bSs146z_b2RpL396tT3hHIo4zO2Dp4zDbIP2E";
-    const MASTER_PIN = "1234"; // Changed to fast 4-digit PIN
+    const MASTER_PIN = "1234"; // Fast 4-Digit Lock
     
     window.jsPDF = window.jspdf.jsPDF; 
 
@@ -437,28 +502,61 @@
     const tbody = document.getElementById('tableBody');
     for (let i=0; i<8; i++) { const tr=document.createElement('tr'); tr.className='skeleton-row'; tr.innerHTML=columns.map(()=>`<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>`).join(''); tbody.appendChild(tr); }
 
+    // --- CORE UTILITIES ---
     function showToast(msg, icon='✓') { const t = document.getElementById('toast'); t.innerHTML = `<span style="opacity:.7">${icon}</span>&nbsp;${msg}`; t.classList.add('visible'); setTimeout(()=>t.classList.remove('visible'), 2800); }
+    
+    // The Comma Stripper - Prevents Database Crashes
     function cleanNum(val) { return parseFloat(String(val).replace(/[^0-9.-]+/g, "")) || 0; }
+    
+    // Display Formatter (Adds Commas for the screen only)
     function formatINR(n) { return new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(n); }
-    function formatCurrencyRaw(num) { return new Intl.NumberFormat('en-IN', { maximumFractionDigits: 2, minimumFractionDigits: 2 }).format(num); }
+    function formatDisplay(num) { return new Intl.NumberFormat('en-IN', { maximumFractionDigits: 2, minimumFractionDigits: 2 }).format(num); }
+    
+    // Database Formatter (Strict 2 Decimals, NO COMMAS)
+    function formatForDB(num) { return Number(num).toFixed(2); }
 
-    // --- UTILS & DATE PARSING ---
     function parseDDMMYYYY(str) {
-        if (!str) return 0;
-        const p = str.split('-');
-        if (p.length !== 3) return 0;
+        if (!str) return 0; const p = str.split('-'); if (p.length !== 3) return 0;
         return new Date(p[2], p[1]-1, p[0]).getTime();
     }
+
+    // Universal Input Clear 'X' Button Logic
+    function clearInput(btn) {
+        const input = btn.previousElementSibling;
+        if(input) {
+            input.value = '';
+            input.dispatchEvent(new Event('input')); // Triggers recalculations or filters
+        }
+    }
+
     function populateDatalists() {
         const suppliers = [...new Set(rawInvoices.map(r => String(r["Name of the supplier"]||'').trim()).filter(Boolean))].sort();
         const items = [...new Set(rawInvoices.map(r => String(r["Description of Goods"]||'').trim()).filter(Boolean))].sort();
         document.getElementById('supplierList').innerHTML = suppliers.map(s => `<option value="${s}">`).join('');
         document.getElementById('itemList').innerHTML = items.map(i => `<option value="${i}">`).join('');
     }
+
     function autoFillGSTIN() {
         const supplierName = document.getElementById('inSupplier').value.trim().toLowerCase(); if (!supplierName) return;
         const match = rawInvoices.find(r => String(r["Name of the supplier"]||'').trim().toLowerCase() === supplierName);
         if (match && match["GSTIN of the supplier"] && match["GSTIN of the supplier"] !== "-" && match["GSTIN of the supplier"] !== "URD") { document.getElementById('inGstin').value = match["GSTIN of the supplier"]; }
+    }
+
+    // Smart Linked Search Logic (Supplier -> Invoice/Date)
+    function updateLinkedSearch(mode) {
+        const supInput = mode === 'pay' ? document.getElementById('gPaySupplier') : document.getElementById('gPrintSupplier');
+        const invList = document.getElementById('globalInvoiceList');
+        const dateList = document.getElementById('globalDateList');
+        const sup = supInput.value.trim().toLowerCase();
+        
+        const matches = rawInvoices.filter(r => String(r["Name of the supplier"]).toLowerCase() === sup);
+        const uniqueInvs = [...new Set(matches.map(r => r["Invoice No."]))].sort();
+        const uniqueDates = [...new Set(matches.map(r => r["Date"]))].sort((a,b) => parseDDMMYYYY(b) - parseDDMMYYYY(a));
+        
+        invList.innerHTML = uniqueInvs.map(i => `<option value="${i}">`).join('');
+        dateList.innerHTML = uniqueDates.map(d => `<option value="${d}">`).join('');
+        
+        if (mode === 'pay') tryLoadGlobalLedger();
     }
 
     // --- INITIAL FETCH ---
@@ -479,7 +577,6 @@
             if (payRes.ok) rawPayments = await payRes.json();
 
             processPaymentsEngine();
-            
             document.querySelectorAll('.control-input').forEach(el => el.disabled = false);
             document.getElementById('unpaidFilter').disabled = false;
             document.getElementById('exportBtn').style.display = 'flex'; document.getElementById('newBtn').style.display = 'flex'; document.getElementById('analyticsBtn').style.display = 'flex';
@@ -512,14 +609,16 @@
     function requirePin(actionFunction) { pendingAdminAction = actionFunction; document.getElementById('pinModal').classList.add('active'); document.getElementById('adminPin').value = ''; setTimeout(()=> document.getElementById('adminPin').focus(), 100); }
     function cancelPin() { document.getElementById('pinModal').classList.remove('active'); pendingAdminAction = null; }
     function submitPin() {
-        if(document.getElementById('adminPin').value === MASTER_PIN) {
-            document.getElementById('pinModal').classList.remove('active');
-            if(pendingAdminAction) pendingAdminAction();
+        if(document.getElementById('adminPin').value === MASTER_PIN) { document.getElementById('pinModal').classList.remove('active'); if(pendingAdminAction) pendingAdminAction();
         } else { showToast("Incorrect PIN", "❌"); document.getElementById('adminPin').value = ''; }
     }
 
     // --- GLOBAL COMMAND CENTER LOGIC ---
-    function openGlobalPrint() { document.getElementById('gPrintSupplier').value = ''; document.getElementById('gPrintInvoice').value = ''; document.getElementById('globalPrintModal').classList.add('active'); }
+    function openGlobalPrint() { 
+        document.getElementById('gPrintSupplier').value = ''; document.getElementById('gPrintInvoice').value = ''; document.getElementById('gPrintDate').value = '';
+        document.getElementById('globalInvoiceList').innerHTML = ''; document.getElementById('globalDateList').innerHTML = '';
+        document.getElementById('globalPrintModal').classList.add('active'); 
+    }
     function executeGlobalPrint() {
         const type = document.getElementById('gPrintType').value; const sup = document.getElementById('gPrintSupplier').value.trim().toLowerCase(); const inv = document.getElementById('gPrintInvoice').value.trim().toLowerCase();
         if(!sup || !inv) { showToast("Enter Supplier and Invoice No.", "⚠"); return; }
@@ -532,7 +631,8 @@
     function openGlobalPayment() {
         currentPayInvoice = null; currentPaySupplier = null; document.getElementById('payModalTitle').textContent = `Log Payment`; document.getElementById('payModalSub').textContent = "Awaiting Search...";
         document.getElementById('payAmount').value = ''; const today = new Date(); document.getElementById('payDate').value = `${String(today.getDate()).padStart(2,'0')}-${String(today.getMonth()+1).padStart(2,'0')}-${today.getFullYear()}`;
-        document.getElementById('globalPayInputs').style.display = 'grid'; document.getElementById('gPaySupplier').value = ''; document.getElementById('gPayInvoice').value = '';
+        document.getElementById('globalPayInputs').style.display = 'grid'; document.getElementById('gPaySupplier').value = ''; document.getElementById('gPayInvoice').value = ''; document.getElementById('gPayDate').value = '';
+        document.getElementById('globalInvoiceList').innerHTML = ''; document.getElementById('globalDateList').innerHTML = '';
         document.getElementById('paymentHistoryBody').innerHTML = '<tr><td colspan="2" style="text-align:center;color:var(--text-dim);padding:30px">Enter Supplier and Invoice No. above to load ledger.</td></tr>';
         document.getElementById('ledgTotal').textContent = '₹0'; document.getElementById('ledgPaid').textContent = '₹0'; document.getElementById('ledgBalance').textContent = '₹0';
         document.getElementById('paymentModal').classList.add('active');
@@ -566,7 +666,7 @@
         let totalBill = 0; rawInvoices.filter(r => `${r["Invoice No."]}||${r["Name of the supplier"]}`.toLowerCase() === key).forEach(r => totalBill += r._num_total);
         let payments = rawPayments.filter(p => `${p.invoice_no}||${p.supplier_name}`.toLowerCase() === key);
         let totalPaid = 0; let histHTML = '';
-        payments.sort((a,b) => parseDDMMYYYY(b.payment_date) - parseDDMMYYYY(a.payment_date)).forEach(p => { let amt = cleanNum(p.amount); totalPaid += amt; histHTML += `<tr><td>${p.payment_date}</td><td style="text-align:right">₹${formatCurrencyRaw(amt)}</td></tr>`; });
+        payments.sort((a,b) => parseDDMMYYYY(b.payment_date) - parseDDMMYYYY(a.payment_date)).forEach(p => { let amt = cleanNum(p.amount); totalPaid += amt; histHTML += `<tr><td>${p.payment_date}</td><td style="text-align:right">₹${formatDisplay(amt)}</td></tr>`; });
         if(payments.length === 0) histHTML = `<tr><td colspan="2" style="text-align:center;color:var(--text-dim);padding:20px">No payments logged yet.</td></tr>`;
         document.getElementById('paymentHistoryBody').innerHTML = histHTML; document.getElementById('ledgTotal').textContent = formatINR(totalBill);
         document.getElementById('ledgPaid').textContent = formatINR(totalPaid); document.getElementById('ledgBalance').textContent = formatINR(totalBill - totalPaid);
@@ -576,7 +676,9 @@
         const amt = parseFloat(document.getElementById('payAmount').value); const date = document.getElementById('payDate').value.trim();
         if(!amt || amt <= 0 || !date) { showToast("Enter a valid amount and date","⚠"); return; }
         const btn = document.getElementById('savePayBtn'); btn.disabled = true; btn.textContent = "Saving...";
-        const payload = { "invoice_no": currentPayInvoice, "supplier_name": currentPaySupplier, "amount": amt, "payment_date": date };
+        
+        // Payload sends pure number to avoid Comma Crash
+        const payload = { "invoice_no": currentPayInvoice, "supplier_name": currentPaySupplier, "amount": formatForDB(amt), "payment_date": date };
         try {
             const res = await fetch(`${SUPABASE_URL}/rest/v1/payments`, { method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' }, body: JSON.stringify(payload) });
             if (!res.ok) throw new Error("Payment failed");
@@ -599,11 +701,11 @@
         doc.text(`Invoice No: ${invNo}`, 14, 50); doc.text(`Date: ${clickedRow["Date"]}`, 14, 56);
         doc.text(`Billed To: INDIAN COMMODITIES AND SPICES`, 120, 50); doc.text(`Surat, Gujarat, India`, 120, 56);
         let tableBody = [], sumTax=0, sumGst=0, sumTotal=0;
-        items.forEach(i => { sumTax += i._num_tax; sumGst += i._num_gst; sumTotal += i._num_total; tableBody.push([i["Description of Goods"], i["Quantity"], `Rs ${formatCurrencyRaw(i._num_rate)}`, `Rs ${formatCurrencyRaw(i._num_tax)}`, `Rs ${formatCurrencyRaw(i._num_gst)}`, `Rs ${formatCurrencyRaw(i._num_total)}`]); });
+        items.forEach(i => { sumTax += i._num_tax; sumGst += i._num_gst; sumTotal += i._num_total; tableBody.push([i["Description of Goods"], i["Quantity"], `Rs ${formatDisplay(i._num_rate)}`, `Rs ${formatDisplay(i._num_tax)}`, `Rs ${formatDisplay(i._num_gst)}`, `Rs ${formatDisplay(i._num_total)}`]); });
         doc.autoTable({ startY: 65, head: [['Item Description', 'Qty', 'Rate', 'Taxable', 'GST', 'Total']], body: tableBody, theme: 'grid', headStyles: { fillColor: [0, 102, 204] } });
         const finalY = doc.lastAutoTable.finalY + 15;
-        doc.setFontSize(11); doc.text(`Total Taxable: Rs ${formatCurrencyRaw(sumTax)}`, 130, finalY); doc.text(`Total GST: Rs ${formatCurrencyRaw(sumGst)}`, 130, finalY + 7);
-        doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.text(`GRAND TOTAL: Rs ${formatCurrencyRaw(sumTotal)}`, 130, finalY + 16);
+        doc.setFontSize(11); doc.text(`Total Taxable: Rs ${formatDisplay(sumTax)}`, 130, finalY); doc.text(`Total GST: Rs ${formatDisplay(sumGst)}`, 130, finalY + 7);
+        doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.text(`GRAND TOTAL: Rs ${formatDisplay(sumTotal)}`, 130, finalY + 16);
         doc.save(`Invoice_${invNo}_${sup.substring(0,10)}.pdf`); showToast("Invoice PDF Generated", "📄");
     }
 
@@ -612,23 +714,28 @@
         let key = `${currentPayInvoice}||${currentPaySupplier}`.toLowerCase();
         let totalBill = 0; rawInvoices.filter(r => `${r["Invoice No."]}||${r["Name of the supplier"]}`.toLowerCase() === key).forEach(r => totalBill += r._num_total);
         let payments = rawPayments.filter(p => `${p.invoice_no}||${p.supplier_name}`.toLowerCase() === key).sort((a,b) => parseDDMMYYYY(b.payment_date) - parseDDMMYYYY(a.payment_date));
-        let totalPaid = 0; let tableBody = payments.map(p => { let amt = cleanNum(p.amount); totalPaid += amt; return [p.payment_date, `Rs ${formatCurrencyRaw(amt)}`]; });
+        let totalPaid = 0; let tableBody = payments.map(p => { let amt = cleanNum(p.amount); totalPaid += amt; return [p.payment_date, `Rs ${formatDisplay(amt)}`]; });
         if(tableBody.length===0) tableBody=[['No payments logged', '-']]; let balance = totalBill - totalPaid;
         const doc = new jsPDF();
         doc.setFontSize(22); doc.setFont("helvetica", "bold"); doc.text(currentPaySupplier.toUpperCase(), 14, 22);
         doc.setFontSize(10); doc.setFont("helvetica", "normal"); doc.text("PAYMENT LEDGER STATEMENT", 14, 28);
         doc.setLineWidth(0.5); doc.line(14, 32, 196, 32);
         doc.setFontSize(11); doc.text(`Billed To: INDIAN COMMODITIES AND SPICES`, 14, 42); doc.text(`Invoice No: ${currentPayInvoice}`, 120, 42);
-        doc.setFont("helvetica", "bold"); doc.text(`Total Invoice Amount: Rs ${formatCurrencyRaw(totalBill)}`, 14, 52);
+        doc.setFont("helvetica", "bold"); doc.text(`Total Invoice Amount: Rs ${formatDisplay(totalBill)}`, 14, 52);
         doc.autoTable({ startY: 60, head: [['Payment Date', 'Amount Paid']], body: tableBody, theme: 'striped', headStyles: { fillColor: [28, 124, 55] } });
         const finalY = doc.lastAutoTable.finalY + 15;
-        doc.setFontSize(12); doc.setFont("helvetica", "normal"); doc.text(`Total Paid So Far: Rs ${formatCurrencyRaw(totalPaid)}`, 14, finalY);
-        doc.setFont("helvetica", "bold"); doc.setTextColor(211,47,47); doc.text(`REMAINING BALANCE: Rs ${formatCurrencyRaw(balance)}`, 14, finalY + 8);
+        doc.setFontSize(12); doc.setFont("helvetica", "normal"); doc.text(`Total Paid So Far: Rs ${formatDisplay(totalPaid)}`, 14, finalY);
+        doc.setFont("helvetica", "bold"); doc.setTextColor(211,47,47); doc.text(`REMAINING BALANCE: Rs ${formatDisplay(balance)}`, 14, finalY + 8);
         doc.save(`Ledger_${currentPayInvoice}_${currentPaySupplier.substring(0,10)}.pdf`); showToast("Ledger PDF Generated", "📄");
     }
 
     // --- FORM LOGIC (ADD/EDIT/DELETE) ---
-    function openNewInvoiceModal() { editingId = null; document.getElementById('formModalTitle').textContent = "New Invoice Entry"; document.getElementById('saveBtn').textContent = "Save Invoice"; document.getElementById('formModal').classList.add('active'); liveCalc(); }
+    function openNewInvoiceModal() { 
+        editingId = null; document.getElementById('formModalTitle').textContent = "New Invoice Entry"; document.getElementById('saveBtn').textContent = "Save Invoice"; 
+        const today = new Date(); document.getElementById('inDate').value = `${String(today.getDate()).padStart(2,'0')}-${String(today.getMonth()+1).padStart(2,'0')}-${today.getFullYear()}`;
+        document.getElementById('formModal').classList.add('active'); liveCalc(); 
+    }
+    
     function closeFormModal() { document.getElementById('formModal').classList.remove('active'); }
     
     function clearProductDetails() {
@@ -637,13 +744,28 @@
         document.getElementById('inItem').focus(); liveCalc();
     }
 
+    function clearEntireForm() {
+        document.getElementById('inSupplier').value = ''; document.getElementById('inGstin').value = ''; document.getElementById('inInvoice').value = ''; 
+        document.getElementById('inShipment').value = ''; document.getElementById('inExportHsn').value = ''; document.getElementById('inType').value = 'DOMESTIC';
+        const today = new Date(); document.getElementById('inDate').value = `${String(today.getDate()).padStart(2,'0')}-${String(today.getMonth()+1).padStart(2,'0')}-${today.getFullYear()}`;
+        clearProductDetails();
+    }
+
+    // The Mathematical Safe Lock (Strict 2 Decimals)
     function liveCalc() {
         const qty = parseFloat(document.getElementById('inQty').value) || 0; const rate = parseFloat(document.getElementById('inRate').value) || 0;
         const discount = parseFloat(document.getElementById('inDiscount').value) || 0; const gstPct = parseFloat(document.getElementById('inGstPct').value) || 0;
-        const gross = qty * rate; const tax = Math.max(0, gross - discount); const gst = tax * (gstPct / 100); const total = tax + gst;
-        document.getElementById('calcGross').innerText = "₹" + formatCurrencyRaw(gross); document.getElementById('calcDiscount').innerText = "- ₹" + formatCurrencyRaw(discount);
-        document.getElementById('calcTaxable').innerText = "₹" + formatCurrencyRaw(tax); document.getElementById('calcGstAmount').innerText = "₹" + formatCurrencyRaw(gst);
-        document.getElementById('calcTotal').innerText = "₹" + formatCurrencyRaw(total);
+        
+        // Ensure perfect float rounding to 2 decimals mathematically
+        const gross = Math.round((qty * rate) * 100) / 100; 
+        const tax = Math.max(0, Math.round((gross - discount) * 100) / 100); 
+        const gst = Math.round((tax * (gstPct / 100)) * 100) / 100; 
+        const total = Math.round((tax + gst) * 100) / 100;
+        
+        // Display uses commas
+        document.getElementById('calcGross').innerText = "₹" + formatDisplay(gross); document.getElementById('calcDiscount').innerText = "- ₹" + formatDisplay(discount);
+        document.getElementById('calcTaxable').innerText = "₹" + formatDisplay(tax); document.getElementById('calcGstAmount').innerText = "₹" + formatDisplay(gst);
+        document.getElementById('calcTotal').innerText = "₹" + formatDisplay(total);
     }
     
     function editInvoice(siNo) {
@@ -656,7 +778,7 @@
         document.getElementById('inRate').value = row._num_rate || 0;
         const gross = row._num_qty * row._num_rate; const discount = Math.max(0, gross - row._num_tax); document.getElementById('inDiscount').value = discount;
         let gstPct = (row["GST%"]||'').replace('%',''); document.getElementById('inGstPct').value = gstPct || "0";
-        document.getElementById('inShipment').value = row["SHIPMENT NO."] || ''; document.getElementById('inType').value = row["EXPORT/DOMESTIC"] || 'DOMESTIC';
+        document.getElementById('inShipment').value = row["SHIPMENT NO."] || ''; document.getElementById('inExportHsn').value = row["EXPORT HSN"] || ''; document.getElementById('inType').value = row["EXPORT/DOMESTIC"] || 'DOMESTIC';
         document.getElementById('formModal').classList.add('active'); liveCalc();
     }
 
@@ -674,26 +796,37 @@
         try {
             const supplier = document.getElementById('inSupplier').value || "Unknown"; let gstin = document.getElementById('inGstin').value;
             if (!gstin) { const found = rawInvoices.find(r => r["Name of the supplier"] === supplier); if (found && found["GSTIN of the supplier"]) gstin = found["GSTIN of the supplier"]; }
+            
             const qty = parseFloat(document.getElementById('inQty').value) || 0; const rate = parseFloat(document.getElementById('inRate').value) || 0;
             const discount = parseFloat(document.getElementById('inDiscount').value) || 0; const gstPct = parseFloat(document.getElementById('inGstPct').value) || 0;
-            const gross = qty * rate; const tax = Math.max(0, gross - discount); const gst = tax * (gstPct / 100); const total = tax + gst;
+            
+            // Re-calculate safely
+            const gross = Math.round((qty * rate) * 100) / 100; 
+            const tax = Math.max(0, Math.round((gross - discount) * 100) / 100); 
+            const gst = Math.round((tax * (gstPct / 100)) * 100) / 100; 
+            const total = Math.round((tax + gst) * 100) / 100;
+
+            // Payload sent to DB uses formatForDB() - NO COMMAS
             const payload = {
                 "SI No": editingId ? editingId : "INV-" + Date.now().toString().slice(-6),
                 "Name of the supplier": supplier, "GSTIN of the supplier": gstin || "-",
                 "Invoice No.": document.getElementById('inInvoice').value || "-", "Date": document.getElementById('inDate').value.trim() || "-",
                 "Description of Goods": document.getElementById('inItem').value || "-", "HSN/SAC": document.getElementById('inHsn').value || "-",
-                "Quantity": qty, "UNIT": document.getElementById('inUnit').value || "-",
-                "Rate": rate, "TAXABLE AMOUNT": formatCurrencyRaw(tax), "GST%": document.getElementById('inGstPct').value + "%", "GST": formatCurrencyRaw(gst),
-                "TOTAL AMOUNT": formatCurrencyRaw(total), "SHIPMENT NO.": document.getElementById('inShipment').value || "-",
-                "SHIPMENT GROUP": "-", "EXPORT HSN": "-", "EXPORT/DOMESTIC": document.getElementById('inType').value
+                "Quantity": formatForDB(qty), "UNIT": document.getElementById('inUnit').value || "-",
+                "Rate": formatForDB(rate), "TAXABLE AMOUNT": formatForDB(tax), "GST%": document.getElementById('inGstPct').value + "%", "GST": formatForDB(gst),
+                "TOTAL AMOUNT": formatForDB(total), "SHIPMENT NO.": document.getElementById('inShipment').value || "-",
+                "SHIPMENT GROUP": "-", "EXPORT HSN": document.getElementById('inExportHsn').value || "-", "EXPORT/DOMESTIC": document.getElementById('inType').value
             };
+            
             const url = editingId ? `${SUPABASE_URL}/rest/v1/invoices?SI%20No=eq.${encodeURIComponent(editingId)}` : `${SUPABASE_URL}/rest/v1/invoices`;
             const method = editingId ? 'PATCH' : 'POST';
             const res = await fetch(url, { method: method, headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' }, body: JSON.stringify(payload) });
             if (!res.ok) throw new Error("Database save failed");
+            
             const savedData = await res.json();
             const normalizedRow = { ...savedData[0], _ts_date: parseDDMMYYYY(savedData[0]["Date"]), _num_tax: cleanNum(savedData[0]["TAXABLE AMOUNT"]), _num_gst: cleanNum(savedData[0]["GST"]), _num_total: cleanNum(savedData[0]["TOTAL AMOUNT"]), _num_qty: cleanNum(savedData[0]["Quantity"]), _num_rate: cleanNum(savedData[0]["Rate"]) };
             if(editingId) { const idx = rawInvoices.findIndex(r => r["SI No"] === editingId); if(idx !== -1) rawInvoices[idx] = normalizedRow; } else { rawInvoices.push(normalizedRow); }
+            
             processPaymentsEngine(); populateDatalists(); applyFilters(); showToast(editingId ? "Invoice updated!" : "Invoice saved!"); closeFormModal();
         } catch(err) { console.error(err); alert("Error saving to database. Check your connection."); } 
         finally { btn.innerText = editingId ? "Update Invoice" : "Save Invoice"; btn.disabled = false; }
@@ -707,7 +840,6 @@
         const dFrom = document.getElementById('dateFrom').value.trim();
         const dTo = document.getElementById('dateTo').value.trim();
 
-        document.getElementById('clearSearchBtn').style.display = q.length > 0 ? 'flex' : 'none';
         document.getElementById('resetFiltersBtn').style.display = (q || shipVal || dFrom || dTo || unpaidOnly) ? 'inline-block' : 'none';
 
         let fromTs = dFrom ? parseDDMMYYYY(dFrom) : 0;
@@ -774,10 +906,10 @@
                 <td style="text-align:right">${row["Quantity"]||'—'}</td>
                 <td style="color:var(--text-secondary)">${row["UNIT"]||'—'}</td>
                 <td><span class="rate-val">₹${row["Rate"]||'0'}</span></td>
-                <td style="font-family:var(--mono);font-size:12px">₹${row["TAXABLE AMOUNT"]||'0'}</td>
+                <td style="font-family:var(--mono);font-size:12px">₹${formatDisplay(row._num_tax)}</td>
                 <td style="color:var(--text-secondary)">${row["GST%"]||'—'}</td>
-                <td style="font-family:var(--mono);font-size:12px">₹${row["GST"]||'0'}</td>
-                <td><span class="amount-val">₹${row["TOTAL AMOUNT"]||'0'}</span></td>
+                <td style="font-family:var(--mono);font-size:12px">₹${formatDisplay(row._num_gst)}</td>
+                <td><span class="amount-val">₹${formatDisplay(row._num_total)}</span></td>
                 <td><span class="type-pill ${statClass}">${row._status}</span></td>
                 <td class="action-cell">
                     <button class="action-icon" onclick="generateSmartInvoicePDF('${row["SI No"]}')" title="Print Invoice">📄</button>
@@ -844,14 +976,10 @@
     }
     function closeModal(){document.getElementById('chartModal').classList.remove('active');}
 
-    // --- EVENT LISTENERS ---
+    // --- MAIN EVENT LISTENERS ---
     document.getElementById('searchBar').addEventListener('input', applyFilters);
     document.getElementById('dateFrom').addEventListener('input', applyFilters);
     document.getElementById('dateTo').addEventListener('input', applyFilters);
-    
-    document.getElementById('clearSearchBtn').addEventListener('click', () => { 
-        document.getElementById('searchBar').value = ''; applyFilters(); 
-    });
 
     document.getElementById('resetFiltersBtn').addEventListener('click', () => { 
         document.getElementById('searchBar').value=''; document.getElementById('unpaidFilter').checked=false; 
