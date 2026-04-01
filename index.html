@@ -478,7 +478,7 @@
     // --- DATABASE CONFIG ---
     const SUPABASE_URL = "https://ssiaeejsqoxfwjnaedgn.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNzaWFlZWpzcW94ZndqbmFlZGduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4NDg0NzIsImV4cCI6MjA5MDQyNDQ3Mn0.e7Nxs_bSs146z_b2RpL396tT3hHIo4zO2Dp4zDbIP2E";
-    const MASTER_PIN = "1234"; // Fast 4-Digit Lock
+    const MASTER_PIN = "1234"; 
     
     window.jsPDF = window.jspdf.jsPDF; 
 
@@ -505,28 +505,18 @@
     // --- CORE UTILITIES ---
     function showToast(msg, icon='✓') { const t = document.getElementById('toast'); t.innerHTML = `<span style="opacity:.7">${icon}</span>&nbsp;${msg}`; t.classList.add('visible'); setTimeout(()=>t.classList.remove('visible'), 2800); }
     
-    // The Comma Stripper - Prevents Database Crashes
     function cleanNum(val) { return parseFloat(String(val).replace(/[^0-9.-]+/g, "")) || 0; }
-    
-    // Display Formatter (Adds Commas for the screen only)
     function formatINR(n) { return new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(n); }
     function formatDisplay(num) { return new Intl.NumberFormat('en-IN', { maximumFractionDigits: 2, minimumFractionDigits: 2 }).format(num); }
     
-    // Database Formatter (Strict 2 Decimals, NO COMMAS)
-    function formatForDB(num) { return Number(num).toFixed(2); }
-
     function parseDDMMYYYY(str) {
         if (!str) return 0; const p = str.split('-'); if (p.length !== 3) return 0;
         return new Date(p[2], p[1]-1, p[0]).getTime();
     }
 
-    // Universal Input Clear 'X' Button Logic
     function clearInput(btn) {
         const input = btn.previousElementSibling;
-        if(input) {
-            input.value = '';
-            input.dispatchEvent(new Event('input')); // Triggers recalculations or filters
-        }
+        if(input) { input.value = ''; input.dispatchEvent(new Event('input')); }
     }
 
     function populateDatalists() {
@@ -542,7 +532,6 @@
         if (match && match["GSTIN of the supplier"] && match["GSTIN of the supplier"] !== "-" && match["GSTIN of the supplier"] !== "URD") { document.getElementById('inGstin').value = match["GSTIN of the supplier"]; }
     }
 
-    // Smart Linked Search Logic (Supplier -> Invoice/Date)
     function updateLinkedSearch(mode) {
         const supInput = mode === 'pay' ? document.getElementById('gPaySupplier') : document.getElementById('gPrintSupplier');
         const invList = document.getElementById('globalInvoiceList');
@@ -555,7 +544,6 @@
         
         invList.innerHTML = uniqueInvs.map(i => `<option value="${i}">`).join('');
         dateList.innerHTML = uniqueDates.map(d => `<option value="${d}">`).join('');
-        
         if (mode === 'pay') tryLoadGlobalLedger();
     }
 
@@ -605,7 +593,6 @@
         currentData = [...rawInvoices];
     }
 
-    // --- ADMIN SECURITY LOCK ---
     function requirePin(actionFunction) { pendingAdminAction = actionFunction; document.getElementById('pinModal').classList.add('active'); document.getElementById('adminPin').value = ''; setTimeout(()=> document.getElementById('adminPin').focus(), 100); }
     function cancelPin() { document.getElementById('pinModal').classList.remove('active'); pendingAdminAction = null; }
     function submitPin() {
@@ -651,7 +638,6 @@
         }
     }
 
-    // --- LEDGER MODAL ---
     function openPaymentModal(invoiceNo, supplier) {
         document.getElementById('globalPayInputs').style.display = 'none'; currentPayInvoice = invoiceNo; currentPaySupplier = supplier;
         document.getElementById('payModalTitle').textContent = `Ledger: ${invoiceNo}`; document.getElementById('payModalSub').textContent = supplier;
@@ -677,8 +663,7 @@
         if(!amt || amt <= 0 || !date) { showToast("Enter a valid amount and date","⚠"); return; }
         const btn = document.getElementById('savePayBtn'); btn.disabled = true; btn.textContent = "Saving...";
         
-        // Payload sends pure number to avoid Comma Crash
-        const payload = { "invoice_no": currentPayInvoice, "supplier_name": currentPaySupplier, "amount": formatForDB(amt), "payment_date": date };
+        const payload = { "invoice_no": currentPayInvoice, "supplier_name": currentPaySupplier, "amount": Number(amt), "payment_date": date };
         try {
             const res = await fetch(`${SUPABASE_URL}/rest/v1/payments`, { method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' }, body: JSON.stringify(payload) });
             if (!res.ok) throw new Error("Payment failed");
@@ -687,7 +672,6 @@
         } catch(e) { showToast("Error saving payment","❌"); } finally { btn.disabled = false; btn.textContent = "Add Payment"; }
     }
 
-    // --- SMART INVOICE & LEDGER PDF GENERATION ---
     function generateSmartInvoicePDF(siNo) {
         const clickedRow = rawInvoices.find(r => r["SI No"] === siNo); if(!clickedRow) return;
         const invNo = clickedRow["Invoice No."]; const sup = clickedRow["Name of the supplier"];
@@ -751,18 +735,15 @@
         clearProductDetails();
     }
 
-    // The Mathematical Safe Lock (Strict 2 Decimals)
     function liveCalc() {
         const qty = parseFloat(document.getElementById('inQty').value) || 0; const rate = parseFloat(document.getElementById('inRate').value) || 0;
         const discount = parseFloat(document.getElementById('inDiscount').value) || 0; const gstPct = parseFloat(document.getElementById('inGstPct').value) || 0;
         
-        // Ensure perfect float rounding to 2 decimals mathematically
         const gross = Math.round((qty * rate) * 100) / 100; 
         const tax = Math.max(0, Math.round((gross - discount) * 100) / 100); 
         const gst = Math.round((tax * (gstPct / 100)) * 100) / 100; 
         const total = Math.round((tax + gst) * 100) / 100;
         
-        // Display uses commas
         document.getElementById('calcGross').innerText = "₹" + formatDisplay(gross); document.getElementById('calcDiscount').innerText = "- ₹" + formatDisplay(discount);
         document.getElementById('calcTaxable').innerText = "₹" + formatDisplay(tax); document.getElementById('calcGstAmount').innerText = "₹" + formatDisplay(gst);
         document.getElementById('calcTotal').innerText = "₹" + formatDisplay(total);
@@ -793,43 +774,88 @@
     
     async function saveToDatabase() {
         const btn = document.getElementById('saveBtn'); btn.innerText = "Saving to Server..."; btn.disabled = true;
+        
         try {
-            const supplier = document.getElementById('inSupplier').value || "Unknown"; let gstin = document.getElementById('inGstin').value;
+            const supplier = document.getElementById('inSupplier').value || "Unknown"; 
+            let gstin = document.getElementById('inGstin').value;
             if (!gstin) { const found = rawInvoices.find(r => r["Name of the supplier"] === supplier); if (found && found["GSTIN of the supplier"]) gstin = found["GSTIN of the supplier"]; }
             
-            const qty = parseFloat(document.getElementById('inQty').value) || 0; const rate = parseFloat(document.getElementById('inRate').value) || 0;
-            const discount = parseFloat(document.getElementById('inDiscount').value) || 0; const gstPct = parseFloat(document.getElementById('inGstPct').value) || 0;
+            const qty = parseFloat(document.getElementById('inQty').value) || 0; 
+            const rate = parseFloat(document.getElementById('inRate').value) || 0;
+            const discount = parseFloat(document.getElementById('inDiscount').value) || 0; 
+            const gstPct = parseFloat(document.getElementById('inGstPct').value) || 0;
             
-            // Re-calculate safely
             const gross = Math.round((qty * rate) * 100) / 100; 
             const tax = Math.max(0, Math.round((gross - discount) * 100) / 100); 
             const gst = Math.round((tax * (gstPct / 100)) * 100) / 100; 
             const total = Math.round((tax + gst) * 100) / 100;
 
-            // Payload sent to DB uses formatForDB() - NO COMMAS
+            // BUG FIX: Send Pure JS Numbers. NO strings, NO commas.
             const payload = {
                 "SI No": editingId ? editingId : "INV-" + Date.now().toString().slice(-6),
-                "Name of the supplier": supplier, "GSTIN of the supplier": gstin || "-",
-                "Invoice No.": document.getElementById('inInvoice').value || "-", "Date": document.getElementById('inDate').value.trim() || "-",
-                "Description of Goods": document.getElementById('inItem').value || "-", "HSN/SAC": document.getElementById('inHsn').value || "-",
-                "Quantity": formatForDB(qty), "UNIT": document.getElementById('inUnit').value || "-",
-                "Rate": formatForDB(rate), "TAXABLE AMOUNT": formatForDB(tax), "GST%": document.getElementById('inGstPct').value + "%", "GST": formatForDB(gst),
-                "TOTAL AMOUNT": formatForDB(total), "SHIPMENT NO.": document.getElementById('inShipment').value || "-",
-                "SHIPMENT GROUP": "-", "EXPORT HSN": document.getElementById('inExportHsn').value || "-", "EXPORT/DOMESTIC": document.getElementById('inType').value
+                "Name of the supplier": supplier, 
+                "GSTIN of the supplier": gstin || "-",
+                "Invoice No.": document.getElementById('inInvoice').value || "-", 
+                "Date": document.getElementById('inDate').value.trim() || "-",
+                "Description of Goods": document.getElementById('inItem').value || "-", 
+                "HSN/SAC": document.getElementById('inHsn').value || "-",
+                "Quantity": Number(qty), 
+                "UNIT": document.getElementById('inUnit').value || "-",
+                "Rate": Number(rate), 
+                "TAXABLE AMOUNT": Number(tax), 
+                "GST%": document.getElementById('inGstPct').value + "%", 
+                "GST": Number(gst),
+                "TOTAL AMOUNT": Number(total), 
+                "SHIPMENT NO.": document.getElementById('inShipment').value || "-",
+                "SHIPMENT GROUP": "-", 
+                "EXPORT HSN": document.getElementById('inExportHsn').value || "-", 
+                "EXPORT/DOMESTIC": document.getElementById('inType').value
             };
             
             const url = editingId ? `${SUPABASE_URL}/rest/v1/invoices?SI%20No=eq.${encodeURIComponent(editingId)}` : `${SUPABASE_URL}/rest/v1/invoices`;
             const method = editingId ? 'PATCH' : 'POST';
-            const res = await fetch(url, { method: method, headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' }, body: JSON.stringify(payload) });
-            if (!res.ok) throw new Error("Database save failed");
+            
+            const res = await fetch(url, { 
+                method: method, 
+                headers: { 
+                    'apikey': SUPABASE_KEY, 
+                    'Authorization': `Bearer ${SUPABASE_KEY}`, 
+                    'Content-Type': 'application/json', 
+                    'Prefer': 'return=representation' 
+                }, 
+                body: JSON.stringify(payload) 
+            });
+            
+            // BUG FIX: The Truth Teller. If it fails, capture the EXACT reason from Postgres.
+            if (!res.ok) {
+                let errorDetails = "Unknown database error";
+                try {
+                    const errorJson = await res.json();
+                    errorDetails = errorJson.message || errorJson.details || JSON.stringify(errorJson);
+                } catch(e) {}
+                throw new Error(`Supabase Rejected Save:\n${errorDetails}`);
+            }
             
             const savedData = await res.json();
-            const normalizedRow = { ...savedData[0], _ts_date: parseDDMMYYYY(savedData[0]["Date"]), _num_tax: cleanNum(savedData[0]["TAXABLE AMOUNT"]), _num_gst: cleanNum(savedData[0]["GST"]), _num_total: cleanNum(savedData[0]["TOTAL AMOUNT"]), _num_qty: cleanNum(savedData[0]["Quantity"]), _num_rate: cleanNum(savedData[0]["Rate"]) };
+            
+            // BUG FIX: Ghost Save Protection. If data is empty, construct it from the payload.
+            let normalizedRow;
+            if (savedData && savedData.length > 0) {
+                normalizedRow = { ...savedData[0], _ts_date: parseDDMMYYYY(savedData[0]["Date"]), _num_tax: cleanNum(savedData[0]["TAXABLE AMOUNT"]), _num_gst: cleanNum(savedData[0]["GST"]), _num_total: cleanNum(savedData[0]["TOTAL AMOUNT"]), _num_qty: cleanNum(savedData[0]["Quantity"]), _num_rate: cleanNum(savedData[0]["Rate"]) };
+            } else {
+                normalizedRow = { ...payload, _ts_date: parseDDMMYYYY(payload["Date"]), _num_tax: tax, _num_gst: gst, _num_total: total, _num_qty: qty, _num_rate: rate };
+            }
+            
             if(editingId) { const idx = rawInvoices.findIndex(r => r["SI No"] === editingId); if(idx !== -1) rawInvoices[idx] = normalizedRow; } else { rawInvoices.push(normalizedRow); }
             
             processPaymentsEngine(); populateDatalists(); applyFilters(); showToast(editingId ? "Invoice updated!" : "Invoice saved!"); closeFormModal();
-        } catch(err) { console.error(err); alert("Error saving to database. Check your connection."); } 
-        finally { btn.innerText = editingId ? "Update Invoice" : "Save Invoice"; btn.disabled = false; }
+            
+        } catch(err) { 
+            console.error(err); 
+            alert(err.message); // This will pop up the TRUE error if it fails again
+        } finally { 
+            btn.innerText = editingId ? "Update Invoice" : "Save Invoice"; btn.disabled = false; 
+        }
     }
 
     // --- DASHBOARD & FILTERS LOGIC ---
@@ -938,7 +964,6 @@
         }); renderTable(currentData);
     }
 
-    // --- ANALYTICS, EXPORT, CHART ---
     function toggleAnalytics() {
         isAnalyticsMode = !isAnalyticsMode;
         const btn = document.getElementById('analyticsBtn'); const dash = document.getElementById('analyticsDashboard'); const table = document.getElementById('mainTableCard'); const summary = document.getElementById('supplierSummary');
@@ -987,5 +1012,4 @@
         document.getElementById('dateFrom').value=''; document.getElementById('dateTo').value=''; applyFilters(); 
     });
 </script>
-</body>
 </html>
