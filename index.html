@@ -526,12 +526,35 @@
         if(input) { input.value = ''; input.dispatchEvent(new Event('input')); }
     }
 
+    // --- DYNAMIC FINANCIAL YEAR ENGINE ---
+    function populateDynamicFY() {
+        const presetSelect = document.getElementById('datePreset');
+        const today = new Date();
+        const currentYear = today.getFullYear();
+        const currentMonth = today.getMonth();
+        
+        // Indian FY starts in April (index 3)
+        let fyStartYear = currentMonth >= 3 ? currentYear : currentYear - 1;
+        
+        const optGroup = document.createElement('optgroup');
+        optGroup.label = "Past Financial Years";
+        
+        // Generate the last 5 Financial Years automatically
+        for (let i = 1; i <= 5; i++) {
+            const startY = fyStartYear - i;
+            const endY = startY + 1;
+            const opt = document.createElement('option');
+            opt.value = `past_fy_${startY}`;
+            opt.textContent = `FY ${startY}-${String(endY).slice(-2)}`;
+            optGroup.appendChild(opt);
+        }
+        presetSelect.appendChild(optGroup);
+    }
+
     function populateDatalists() {
-        // Populate Suppliers
         const suppliers = [...new Set(rawInvoices.map(r => String(r["Name of the supplier"]||'').trim()).filter(Boolean))].sort();
         document.getElementById('supplierList').innerHTML = suppliers.map(s => `<option value="${s}">`).join('');
         
-        // Bulletproof Shipment Extraction
         const shipments = [...new Set(rawInvoices.map(r => {
             let val = r["SHIPMENT NO."] || r["SHIPMENT NO"] || '';
             return String(val).trim();
@@ -544,13 +567,11 @@
     function handleSupplierInput() {
         const supName = document.getElementById('inSupplier').value.trim().toLowerCase();
         
-        // 1. Auto GSTIN
         const match = rawInvoices.find(r => String(r["Name of the supplier"]||'').trim().toLowerCase() === supName);
         if (match && match["GSTIN of the supplier"] && match["GSTIN of the supplier"] !== "-" && match["GSTIN of the supplier"] !== "URD") { 
             document.getElementById('inGstin').value = match["GSTIN of the supplier"]; 
         }
 
-        // 2. Filter the Item dropdown specifically for this supplier
         const supItems = [...new Set(rawInvoices
             .filter(r => String(r["Name of the supplier"]).toLowerCase() === supName && r["Description of Goods"] && r["Description of Goods"] !== "-")
             .map(r => r["Description of Goods"])
@@ -565,13 +586,11 @@
         const sup = document.getElementById('inSupplier').value.trim().toLowerCase();
         if (!item) { document.getElementById('lastPriceLabel').innerText = ""; return; }
 
-        // Find history (sort backward to get newest first based on _ts_date)
         const history = rawInvoices
             .filter(r => String(r["Description of Goods"]).toLowerCase() === item)
             .sort((a,b) => b._ts_date - a._ts_date);
 
         if(history.length > 0) {
-            // Skip empty cells: Find first non-empty history values
             const hsnObj = history.find(r => r["HSN/SAC"] && r["HSN/SAC"] !== "-" && String(r["HSN/SAC"]).trim() !== "");
             const unitObj = history.find(r => r["UNIT"] && r["UNIT"] !== "-" && String(r["UNIT"]).trim() !== "");
             const expObj = history.find(r => r["EXPORT HSN"] && r["EXPORT HSN"] !== "-" && String(r["EXPORT HSN"]).trim() !== "");
@@ -580,7 +599,6 @@
             if(unitObj) document.getElementById('inUnit').value = unitObj["UNIT"];
             if(expObj) document.getElementById('inExportHsn').value = expObj["EXPORT HSN"];
 
-            // Find Last Price for THIS specific supplier
             const supHistory = history.filter(r => String(r["Name of the supplier"]).toLowerCase() === sup);
             if(supHistory.length > 0) {
                 document.getElementById('lastPriceLabel').innerText = `Last Rate: ₹${supHistory[0]["Rate"]}`;
@@ -598,7 +616,6 @@
         const inv = document.getElementById('inInvoice').value.trim().toLowerCase();
         const item = document.getElementById('inItem').value.trim().toLowerCase();
         
-        // TRIPLE-LOCK CHECK: Supplier + Invoice + Exact Item
         if(sup && inv && item) {
             const isDup = rawInvoices.some(r => String(r["Name of the supplier"]).toLowerCase() === sup && String(r["Invoice No."]).toLowerCase() === inv && String(r["Description of Goods"]).toLowerCase() === item);
             document.getElementById('dupWarning').style.display = isDup ? 'block' : 'none';
@@ -643,9 +660,14 @@
             dFrom.value = formatDateStr(new Date(y, 0, 1));
             dTo.value = formatDateStr(today);
         } else if (val === 'fy') {
-            const fyStart = m >= 3 ? y : y - 1; // Indian FY: April to March
+            const fyStart = m >= 3 ? y : y - 1; 
             dFrom.value = formatDateStr(new Date(fyStart, 3, 1));
             dTo.value = formatDateStr(new Date(fyStart + 1, 2, 31));
+        } else if (val.startsWith('past_fy_')) {
+            // Handles the dynamic past FYs perfectly
+            const startY = parseInt(val.replace('past_fy_', ''));
+            dFrom.value = formatDateStr(new Date(startY, 3, 1));
+            dTo.value = formatDateStr(new Date(startY + 1, 2, 31));
         }
         applyFilters();
     }
@@ -653,6 +675,8 @@
     // --- INITIAL FETCH ---
     window.onload = async function() {
         try {
+            populateDynamicFY(); // Builds the FY dropdown immediately
+            
             const [invRes, payRes] = await Promise.all([
                 fetch(`${SUPABASE_URL}/rest/v1/invoices?select=*`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }),
                 fetch(`${SUPABASE_URL}/rest/v1/payments?select=*`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } })
@@ -1136,4 +1160,5 @@
         document.getElementById('shipmentFilter').value=''; document.getElementById('datePreset').value=''; 
         document.getElementById('dateFrom').value=''; document.getElementById('dateTo').value=''; applyFilters(); 
     });
+</script>
 </script>
