@@ -313,7 +313,7 @@
             <div>
                 <div class="form-group">
                     <label class="form-label">Supplier Name</label>
-                    <div class="input-wrapper"><input type="text" id="inSupplier" class="control-input" list="supplierList" oninput="autoFillGSTIN()"><button class="clear-btn" onclick="clearInput(this)">✕</button></div>
+                    <div class="input-wrapper"><input type="text" id="inSupplier" class="control-input" list="supplierList" oninput="handleSupplierInput()"><button class="clear-btn" onclick="clearInput(this)">✕</button></div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">GSTIN</label>
@@ -322,7 +322,8 @@
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
                     <div class="form-group">
                         <label class="form-label">Invoice No.</label>
-                        <div class="input-wrapper"><input type="text" id="inInvoice" class="control-input"><button class="clear-btn" onclick="clearInput(this)">✕</button></div>
+                        <div class="input-wrapper"><input type="text" id="inInvoice" class="control-input" oninput="checkDuplicateItem()"><button class="clear-btn" onclick="clearInput(this)">✕</button></div>
+                        <div id="dupWarning" style="display:none; color:var(--red); font-size:11px; font-weight:700; margin-top:4px;">⚠️ Duplicate Product on Invoice</div>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Date</label>
@@ -331,7 +332,7 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Item Description</label>
-                    <div class="input-wrapper"><input type="text" id="inItem" class="control-input" list="itemList"><button class="clear-btn" onclick="clearInput(this)">✕</button></div>
+                    <div class="input-wrapper"><input type="text" id="inItem" class="control-input" list="itemList" oninput="handleItemInput()"><button class="clear-btn" onclick="clearInput(this)">✕</button></div>
                 </div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
                     <div class="form-group">
@@ -351,6 +352,7 @@
                     <div class="form-group">
                         <label class="form-label">Rate (₹)</label>
                         <div class="input-wrapper"><input type="number" id="inRate" class="control-input" value="0" oninput="liveCalc()"><button class="clear-btn" onclick="clearInput(this)">✕</button></div>
+                        <div id="lastPriceLabel" style="color:var(--accent); font-size:11px; font-weight:700; margin-top:4px;"></div>
                     </div>
                 </div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
@@ -486,6 +488,7 @@
     let sortCol=null, sortAsc=true, isAnalyticsMode=false, editingId=null;
     let currentPayInvoice=null, currentPaySupplier=null; 
     let pendingAdminAction = null; 
+    let animFrame = null;
 
     const columns = ["SI No","Invoice No.","Date","Name of the supplier","GSTIN of the supplier","Description of Goods","Quantity","UNIT","Rate","TAXABLE AMOUNT","GST%","GST","TOTAL AMOUNT","STATUS","ACTIONS"];
     const colLabels = {"SI No":"No.","Invoice No.":"Invoice","Date":"Date","Name of the supplier":"Supplier","GSTIN of the supplier":"GSTIN","Description of Goods":"Description","Quantity":"Qty","UNIT":"Unit","Rate":"Rate","TAXABLE AMOUNT":"Taxable","GST%":"GST%","GST":"GST","TOTAL AMOUNT":"Total","STATUS":"Status","ACTIONS":"Actions"};
@@ -510,7 +513,7 @@
     function formatDisplay(num) { return new Intl.NumberFormat('en-IN', { maximumFractionDigits: 2, minimumFractionDigits: 2 }).format(num); }
     
     function parseDDMMYYYY(str) {
-        if (!str) return 0; const p = str.split('-'); if (p.length !== 3) return 0;
+        if (!str || str.length !== 10) return 0; const p = str.split('-'); if (p.length !== 3) return 0;
         return new Date(p[2], p[1]-1, p[0]).getTime();
     }
 
@@ -521,15 +524,75 @@
 
     function populateDatalists() {
         const suppliers = [...new Set(rawInvoices.map(r => String(r["Name of the supplier"]||'').trim()).filter(Boolean))].sort();
-        const items = [...new Set(rawInvoices.map(r => String(r["Description of Goods"]||'').trim()).filter(Boolean))].sort();
         document.getElementById('supplierList').innerHTML = suppliers.map(s => `<option value="${s}">`).join('');
-        document.getElementById('itemList').innerHTML = items.map(i => `<option value="${i}">`).join('');
+        // itemList is now populated dynamically via handleSupplierInput
     }
 
-    function autoFillGSTIN() {
-        const supplierName = document.getElementById('inSupplier').value.trim().toLowerCase(); if (!supplierName) return;
-        const match = rawInvoices.find(r => String(r["Name of the supplier"]||'').trim().toLowerCase() === supplierName);
-        if (match && match["GSTIN of the supplier"] && match["GSTIN of the supplier"] !== "-" && match["GSTIN of the supplier"] !== "URD") { document.getElementById('inGstin').value = match["GSTIN of the supplier"]; }
+    // --- SMART MEMORY & DUPLICATE LOGIC ---
+    function handleSupplierInput() {
+        const supName = document.getElementById('inSupplier').value.trim().toLowerCase();
+        
+        // 1. Auto GSTIN
+        const match = rawInvoices.find(r => String(r["Name of the supplier"]||'').trim().toLowerCase() === supName);
+        if (match && match["GSTIN of the supplier"] && match["GSTIN of the supplier"] !== "-" && match["GSTIN of the supplier"] !== "URD") { 
+            document.getElementById('inGstin').value = match["GSTIN of the supplier"]; 
+        }
+
+        // 2. Filter the Item dropdown specifically for this supplier
+        const supItems = [...new Set(rawInvoices
+            .filter(r => String(r["Name of the supplier"]).toLowerCase() === supName && r["Description of Goods"] && r["Description of Goods"] !== "-")
+            .map(r => r["Description of Goods"])
+        )].sort();
+        document.getElementById('itemList').innerHTML = supItems.map(i => `<option value="${i}">`).join('');
+        
+        checkDuplicateItem();
+    }
+
+    function handleItemInput() {
+        const item = document.getElementById('inItem').value.trim().toLowerCase();
+        const sup = document.getElementById('inSupplier').value.trim().toLowerCase();
+        if (!item) { document.getElementById('lastPriceLabel').innerText = ""; return; }
+
+        // Find history (sort backward to get newest first based on _ts_date)
+        const history = rawInvoices
+            .filter(r => String(r["Description of Goods"]).toLowerCase() === item)
+            .sort((a,b) => b._ts_date - a._ts_date);
+
+        if(history.length > 0) {
+            // Skip empty cells: Find first non-empty history values
+            const hsnObj = history.find(r => r["HSN/SAC"] && r["HSN/SAC"] !== "-" && String(r["HSN/SAC"]).trim() !== "");
+            const unitObj = history.find(r => r["UNIT"] && r["UNIT"] !== "-" && String(r["UNIT"]).trim() !== "");
+            const expObj = history.find(r => r["EXPORT HSN"] && r["EXPORT HSN"] !== "-" && String(r["EXPORT HSN"]).trim() !== "");
+
+            if(hsnObj) document.getElementById('inHsn').value = hsnObj["HSN/SAC"];
+            if(unitObj) document.getElementById('inUnit').value = unitObj["UNIT"];
+            if(expObj) document.getElementById('inExportHsn').value = expObj["EXPORT HSN"];
+
+            // Find Last Price for THIS specific supplier
+            const supHistory = history.filter(r => String(r["Name of the supplier"]).toLowerCase() === sup);
+            if(supHistory.length > 0) {
+                document.getElementById('lastPriceLabel').innerText = `Last Rate: ₹${supHistory[0]["Rate"]}`;
+            } else {
+                document.getElementById('lastPriceLabel').innerText = "";
+            }
+        } else {
+            document.getElementById('lastPriceLabel').innerText = "";
+        }
+        checkDuplicateItem();
+    }
+
+    function checkDuplicateItem() {
+        const sup = document.getElementById('inSupplier').value.trim().toLowerCase();
+        const inv = document.getElementById('inInvoice').value.trim().toLowerCase();
+        const item = document.getElementById('inItem').value.trim().toLowerCase();
+        
+        // TRIPLE-LOCK CHECK: Supplier + Invoice + Exact Item
+        if(sup && inv && item) {
+            const isDup = rawInvoices.some(r => String(r["Name of the supplier"]).toLowerCase() === sup && String(r["Invoice No."]).toLowerCase() === inv && String(r["Description of Goods"]).toLowerCase() === item);
+            document.getElementById('dupWarning').style.display = isDup ? 'block' : 'none';
+        } else {
+            document.getElementById('dupWarning').style.display = 'none';
+        }
     }
 
     function updateLinkedSearch(mode) {
@@ -725,6 +788,7 @@
     function clearProductDetails() {
         document.getElementById('inItem').value = ''; document.getElementById('inHsn').value = ''; document.getElementById('inUnit').value = '';
         document.getElementById('inQty').value = '0'; document.getElementById('inRate').value = '0'; document.getElementById('inDiscount').value = '0';
+        document.getElementById('lastPriceLabel').innerText = ""; document.getElementById('dupWarning').style.display = "none";
         document.getElementById('inItem').focus(); liveCalc();
     }
 
@@ -760,6 +824,8 @@
         const gross = row._num_qty * row._num_rate; const discount = Math.max(0, gross - row._num_tax); document.getElementById('inDiscount').value = discount;
         let gstPct = (row["GST%"]||'').replace('%',''); document.getElementById('inGstPct').value = gstPct || "0";
         document.getElementById('inShipment').value = row["SHIPMENT NO."] || ''; document.getElementById('inExportHsn').value = row["EXPORT HSN"] || ''; document.getElementById('inType').value = row["EXPORT/DOMESTIC"] || 'DOMESTIC';
+        
+        document.getElementById('lastPriceLabel').innerText = ""; document.getElementById('dupWarning').style.display = "none";
         document.getElementById('formModal').classList.add('active'); liveCalc();
     }
 
@@ -790,7 +856,6 @@
             const gst = Math.round((tax * (gstPct / 100)) * 100) / 100; 
             const total = Math.round((tax + gst) * 100) / 100;
 
-            // BUG FIX: Send Pure JS Numbers. NO strings, NO commas.
             const payload = {
                 "SI No": editingId ? editingId : "INV-" + Date.now().toString().slice(-6),
                 "Name of the supplier": supplier, 
@@ -826,7 +891,6 @@
                 body: JSON.stringify(payload) 
             });
             
-            // BUG FIX: The Truth Teller. If it fails, capture the EXACT reason from Postgres.
             if (!res.ok) {
                 let errorDetails = "Unknown database error";
                 try {
@@ -838,7 +902,6 @@
             
             const savedData = await res.json();
             
-            // BUG FIX: Ghost Save Protection. If data is empty, construct it from the payload.
             let normalizedRow;
             if (savedData && savedData.length > 0) {
                 normalizedRow = { ...savedData[0], _ts_date: parseDDMMYYYY(savedData[0]["Date"]), _num_tax: cleanNum(savedData[0]["TAXABLE AMOUNT"]), _num_gst: cleanNum(savedData[0]["GST"]), _num_total: cleanNum(savedData[0]["TOTAL AMOUNT"]), _num_qty: cleanNum(savedData[0]["Quantity"]), _num_rate: cleanNum(savedData[0]["Rate"]) };
@@ -852,7 +915,7 @@
             
         } catch(err) { 
             console.error(err); 
-            alert(err.message); // This will pop up the TRUE error if it fails again
+            alert(err.message); 
         } finally { 
             btn.innerText = editingId ? "Update Invoice" : "Save Invoice"; btn.disabled = false; 
         }
@@ -868,15 +931,22 @@
 
         document.getElementById('resetFiltersBtn').style.display = (q || shipVal || dFrom || dTo || unpaidOnly) ? 'inline-block' : 'none';
 
-        let fromTs = dFrom ? parseDDMMYYYY(dFrom) : 0;
-        let toTs = dTo ? parseDDMMYYYY(dTo) + 86399999 : Infinity;
+        // BUG FIX: Only filter if date is exactly 10 characters (DD-MM-YYYY) so math doesn't glitch while typing
+        let fromTs = (dFrom.length === 10) ? parseDDMMYYYY(dFrom) : 0;
+        let toTs = (dTo.length === 10) ? parseDDMMYYYY(dTo) + 86399999 : Infinity;
 
         currentData = rawInvoices.filter(row => {
             if (unpaidOnly && row._status === "PAID") return false;
+            
+            // Date Filter Check
+            if (fromTs > 0 || toTs < Infinity) {
+                if (!row._ts_date || row._ts_date < fromTs || row._ts_date > toTs) return false;
+            }
+            
             const matchSearch = columns.some(col => String(row[col]||'').toLowerCase().includes(q));
             if (!matchSearch) return false;
+            
             if (shipVal && String(row["SHIPMENT NO."]||'').trim() !== shipVal) return false;
-            if (row._ts_date) { if (row._ts_date < fromTs || row._ts_date > toTs) return false; } else if (fromTs > 0 || toTs < Infinity) { return false; }
             return true;
         });
 
@@ -907,12 +977,16 @@
         let tax=0,gst=0,total=0; let uniqBal = new Map();
         data.forEach(r=>{ tax += r._num_tax; gst += r._num_gst; total += r._num_total; let key = `${r["Invoice No."]}||${r["Name of the supplier"]}`.toLowerCase(); if(!uniqBal.has(key)) uniqBal.set(key, r._group_balance); });
         let outst = 0; uniqBal.forEach(b => outst += b);
+        
+        // Cancel old animation to prevent number glitching
+        if(animFrame) cancelAnimationFrame(animFrame);
+        
         const dur=550; const t0=performance.now();
         (function tick(now) {
             const p = Math.min((now-t0)/dur,1), e=1-Math.pow(1-p,3);
             document.getElementById('totTax').textContent = formatINR(tax*e); document.getElementById('totGst').textContent = formatINR(gst*e);
             document.getElementById('totAmt').textContent = formatINR(total*e); document.getElementById('totOutstanding').textContent = formatINR(outst*e);
-            if (p<1) requestAnimationFrame(tick);
+            if (p<1) animFrame = requestAnimationFrame(tick);
         })(t0);
     }
 
@@ -1012,4 +1086,3 @@
         document.getElementById('dateFrom').value=''; document.getElementById('dateTo').value=''; applyFilters(); 
     });
 </script>
-</html>
