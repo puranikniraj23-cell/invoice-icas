@@ -78,7 +78,7 @@
         .kpi-value.accent { color: var(--accent); }
         .kpi-value.danger { color: var(--red); }
 
-        /* UPGRADED: Universal Input Wrappers for "X" Clear Buttons */
+        /* Universal Input Wrappers for "X" Clear Buttons */
         .input-wrapper { position: relative; display: flex; align-items: center; width: 100%; }
         .control-input { width: 100%; padding: 12px 16px; padding-right: 36px; font-size: 14px; font-family: inherit; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-md); color: var(--text); outline: none; box-shadow: var(--shadow-sm); transition: all 0.2s; cursor: text; }
         .control-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow), var(--shadow-sm); }
@@ -87,7 +87,7 @@
         .clear-btn:hover { background: rgba(0,0,0,0.15); color: var(--text); }
         .input-wrapper:focus-within .clear-btn, .input-wrapper:hover .clear-btn { display: flex; }
         
-        select.control-input { padding-right: 16px; } /* Dropdowns don't need the X */
+        select.control-input { padding-right: 16px; }
 
         /* Filters */
         .filters-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 16px; animation: fadeUp 0.5s 0.12s ease both; }
@@ -96,9 +96,34 @@
         .search-icon-el { position: absolute; left: 16px; color: var(--text-dim); pointer-events: none; z-index: 2; }
         .search-wrap:focus-within .search-icon-el { color: var(--accent); }
         
-        .shipment-wrap { min-width: 140px; } .preset-wrap { min-width: 160px; } .date-wrap { display: flex; align-items: center; gap: 8px; }
+        .shipment-wrap { min-width: 140px; } .date-wrap { display: flex; align-items: center; gap: 8px; }
         .date-sep { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
         
+        /* Custom Expandable Date Dropdown */
+        .custom-dropdown { position: relative; min-width: 170px; font-size: 13px; user-select: none; }
+        .dropdown-header { width: 100%; padding: 12px 16px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-md); color: var(--text); cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); transition: all 0.2s; }
+        .dropdown-header:hover { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow), var(--shadow-sm); }
+        .dropdown-header.active { border-color: var(--accent); }
+        
+        .dropdown-body { position: absolute; top: calc(100% + 6px); left: 0; width: 220px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-md); box-shadow: var(--shadow-lg); z-index: 200; max-height: 400px; overflow-y: auto; display: none; opacity: 0; transform: translateY(-5px); transition: opacity 0.2s, transform 0.2s; }
+        .dropdown-body.show { display: block; opacity: 1; transform: translateY(0); }
+        .dropdown-body::-webkit-scrollbar { width: 6px; }
+        .dropdown-body::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 10px; }
+        
+        .drop-item { padding: 12px 16px; cursor: pointer; color: var(--text); border-bottom: 1px solid rgba(0,0,0,0.03); transition: background 0.2s; }
+        .drop-item:hover { background: var(--surface2); color: var(--accent); }
+        
+        .drop-group-header { padding: 12px 16px; cursor: pointer; color: var(--text); font-weight: 600; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; border-bottom: 1px solid rgba(0,0,0,0.03); background: #fdfdfd; }
+        .drop-group-header:hover { background: var(--surface2); }
+        .drop-group-content { display: none; background: #fafafa; border-bottom: 1px solid var(--border-strong); box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+        .drop-group-content.open { display: block; animation: slideDown 0.2s ease forwards; }
+        
+        .drop-year-label { font-size: 10px; font-weight: 700; color: var(--text-dim); padding: 12px 16px 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .sub-drop-item { padding: 10px 16px 10px 24px; cursor: pointer; color: var(--text-secondary); font-size: 12px; transition: all 0.2s; }
+        .sub-drop-item:hover { background: var(--surface); color: var(--accent); padding-left: 28px; }
+
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
         /* Unpaid Toggle Filter */
         .unpaid-toggle { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--text); cursor: pointer; padding: 12px 16px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-md); box-shadow: var(--shadow-sm); transition: all 0.2s; user-select: none; }
         .unpaid-toggle:hover { border-color: var(--red); box-shadow: 0 0 0 3px rgba(211,47,47,0.1); }
@@ -119,7 +144,7 @@
         .chart-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 24px; box-shadow: var(--shadow-md); }
         .chart-box h3 { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 16px; letter-spacing: -0.3px;}
 
-        /* UPGRADED: Table & Heavy Scrollbar */
+        /* Table & Heavy Scrollbar */
         .table-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow-md); animation: fadeUp 0.5s 0.16s ease both; }
         .table-wrapper { overflow: auto; max-height: 60vh; padding-bottom: 12px; }
         .table-wrapper::-webkit-scrollbar { width: 12px; height: 14px; }
@@ -250,16 +275,34 @@
         <div class="shipment-wrap">
             <select id="shipmentFilter" class="control-input" disabled><option value="">All Shipments</option></select>
         </div>
-        <div class="preset-wrap">
-            <select id="datePreset" class="control-input" disabled>
-                <option value="">Custom Date...</option>
-                <option value="thisMonth">This Month</option>
-                <option value="lastMonth">Last Month</option>
-                <option value="ytd">Year to Date</option>
-                <option value="fy">This Financial Year</option>
-            </select>
-        </div>
         
+        <div class="preset-wrap custom-dropdown" id="datePresetWrapper">
+            <div class="dropdown-header" id="dateDropdownHeader" onclick="toggleDateDropdown()" style="opacity: 0.7; pointer-events: none;">
+                <span id="datePresetLabel">Custom Date...</span>
+                <span class="chevron" style="font-size: 10px;">▼</span>
+            </div>
+            
+            <div class="dropdown-body" id="dateDropdownBody">
+                <div class="drop-item" onclick="selectDatePreset('custom', 'Custom Date...')">Custom Date...</div>
+                <div class="drop-item" onclick="selectDatePreset('thisMonth', 'This Month')">This Month</div>
+                
+                <div class="drop-group">
+                    <div class="drop-group-header" onclick="toggleGroup(this)">
+                        <span>Months</span> <span class="expand-icon">+</span>
+                    </div>
+                    <div class="drop-group-content" id="dynamicMonthsContainer">
+                        </div>
+                </div>
+
+                <div class="drop-group">
+                    <div class="drop-group-header" onclick="toggleGroup(this)">
+                        <span>Financial Years</span> <span class="expand-icon">+</span>
+                    </div>
+                    <div class="drop-group-content" id="dynamicFYContainer" style="border-bottom: none;">
+                        </div>
+                </div>
+            </div>
+        </div>
         <div class="date-wrap">
             <div class="input-wrapper" style="width: 120px;">
                 <input type="text" id="dateFrom" class="control-input" placeholder="DD-MM-YYYY" disabled>
@@ -526,29 +569,129 @@
         if(input) { input.value = ''; input.dispatchEvent(new Event('input')); }
     }
 
-    // --- DYNAMIC FINANCIAL YEAR ENGINE ---
-    function populateDynamicFY() {
-        const presetSelect = document.getElementById('datePreset');
-        const today = new Date();
-        const currentYear = today.getFullYear();
-        const currentMonth = today.getMonth();
-        
-        // Indian FY starts in April (index 3)
-        let fyStartYear = currentMonth >= 3 ? currentYear : currentYear - 1;
-        
-        const optGroup = document.createElement('optgroup');
-        optGroup.label = "Past Financial Years";
-        
-        // Generate the last 5 Financial Years automatically
-        for (let i = 1; i <= 5; i++) {
-            const startY = fyStartYear - i;
-            const endY = startY + 1;
-            const opt = document.createElement('option');
-            opt.value = `past_fy_${startY}`;
-            opt.textContent = `FY ${startY}-${String(endY).slice(-2)}`;
-            optGroup.appendChild(opt);
+    // --- ADVANCED DATE DROPDOWN ENGINE ---
+    function toggleDateDropdown() {
+        const header = document.getElementById('dateDropdownHeader');
+        const body = document.getElementById('dateDropdownBody');
+        header.classList.toggle('active');
+        body.classList.toggle('show');
+    }
+
+    // Close dropdown if clicking outside
+    document.addEventListener('click', function(e) {
+        const wrapper = document.getElementById('datePresetWrapper');
+        if (wrapper && !wrapper.contains(e.target)) {
+            document.getElementById('dateDropdownHeader')?.classList.remove('active');
+            document.getElementById('dateDropdownBody')?.classList.remove('show');
         }
-        presetSelect.appendChild(optGroup);
+    });
+
+    function toggleGroup(headerEl) {
+        const content = headerEl.nextElementSibling;
+        const icon = headerEl.querySelector('.expand-icon');
+        const isOpen = content.classList.contains('open');
+        
+        // Close siblings
+        document.querySelectorAll('.drop-group-content').forEach(el => {
+            el.classList.remove('open');
+            el.previousElementSibling.querySelector('.expand-icon').textContent = '+';
+        });
+
+        if (!isOpen) {
+            content.classList.add('open');
+            icon.textContent = '−';
+        }
+    }
+
+    function selectDatePreset(val, labelText) {
+        document.getElementById('datePresetLabel').textContent = labelText;
+        toggleDateDropdown(); // close it
+        
+        const dFrom = document.getElementById('dateFrom');
+        const dTo = document.getElementById('dateTo');
+        const today = new Date();
+        const y = today.getFullYear();
+        const m = today.getMonth();
+
+        if (val === 'custom') {
+            dFrom.value = ''; dTo.value = ''; // Let user type
+            dFrom.focus();
+            return;
+        }
+
+        if (val === 'thisMonth') {
+            dFrom.value = formatDateStr(new Date(y, m, 1));
+            dTo.value = formatDateStr(new Date(y, m + 1, 0));
+        } else if (val.startsWith('month_')) {
+            const parts = val.split('_');
+            const targetY = parseInt(parts[1]);
+            const targetM = parseInt(parts[2]);
+            dFrom.value = formatDateStr(new Date(targetY, targetM, 1));
+            dTo.value = formatDateStr(new Date(targetY, targetM + 1, 0));
+        } else if (val.startsWith('fy_')) {
+            const startY = parseInt(val.split('_')[1]);
+            dFrom.value = formatDateStr(new Date(startY, 3, 1)); 
+            dTo.value = formatDateStr(new Date(startY + 1, 2, 31)); 
+        }
+        
+        applyFilters();
+    }
+
+    function populateDynamicDropdowns() {
+        const validDates = rawInvoices.map(r => r._ts_date).filter(ts => ts > 0);
+        if(validDates.length === 0) return; 
+
+        const activeMonths = new Set();
+        const activeFYs = new Set();
+
+        validDates.forEach(ts => {
+            const d = new Date(ts);
+            const year = d.getFullYear();
+            const month = d.getMonth();
+            
+            activeMonths.add(`${year}_${month}`);
+            
+            const fyStartYear = month >= 3 ? year : year - 1;
+            activeFYs.add(fyStartYear);
+        });
+
+        const monthContainer = document.getElementById('dynamicMonthsContainer');
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        
+        const sortedMonths = Array.from(activeMonths).sort((a,b) => {
+            const [yA, mA] = a.split('_').map(Number);
+            const [yB, mB] = b.split('_').map(Number);
+            if (yA !== yB) return yB - yA;
+            return mB - mA;
+        });
+
+        let monthHTML = '';
+        let currentYearForMonth = null;
+
+        sortedMonths.forEach(mStr => {
+            const [y, mIndex] = mStr.split('_').map(Number);
+            if (y !== currentYearForMonth) {
+                monthHTML += `<div class="drop-year-label">${y}</div>`;
+                currentYearForMonth = y;
+            }
+            const label = `${monthNames[mIndex]} ${y}`;
+            monthHTML += `<div class="sub-drop-item" onclick="selectDatePreset('month_${y}_${mIndex}', '${label}')">${monthNames[mIndex]}</div>`;
+        });
+        monthContainer.innerHTML = monthHTML;
+
+        const fyContainer = document.getElementById('dynamicFYContainer');
+        const sortedFYs = Array.from(activeFYs).sort((a,b) => b - a); 
+        
+        let fyHTML = '';
+        sortedFYs.forEach(startY => {
+            const endY = String(startY + 1).slice(-2);
+            const label = `FY ${startY}-${endY}`;
+            fyHTML += `<div class="sub-drop-item" onclick="selectDatePreset('fy_${startY}', '${label}')">${label}</div>`;
+        });
+        fyContainer.innerHTML = fyHTML;
+
+        document.getElementById('dateDropdownHeader').style.opacity = '1';
+        document.getElementById('dateDropdownHeader').style.pointerEvents = 'auto';
     }
 
     function populateDatalists() {
@@ -639,44 +782,9 @@
         if (mode === 'pay') tryLoadGlobalLedger();
     }
 
-    // --- DATE PRESET LOGIC ---
-    function handleDatePreset() {
-        const val = document.getElementById('datePreset').value;
-        const dFrom = document.getElementById('dateFrom');
-        const dTo = document.getElementById('dateTo');
-        const today = new Date();
-        const y = today.getFullYear();
-        const m = today.getMonth();
-
-        if (!val) return;
-
-        if (val === 'thisMonth') {
-            dFrom.value = formatDateStr(new Date(y, m, 1));
-            dTo.value = formatDateStr(new Date(y, m + 1, 0));
-        } else if (val === 'lastMonth') {
-            dFrom.value = formatDateStr(new Date(y, m - 1, 1));
-            dTo.value = formatDateStr(new Date(y, m, 0));
-        } else if (val === 'ytd') {
-            dFrom.value = formatDateStr(new Date(y, 0, 1));
-            dTo.value = formatDateStr(today);
-        } else if (val === 'fy') {
-            const fyStart = m >= 3 ? y : y - 1; 
-            dFrom.value = formatDateStr(new Date(fyStart, 3, 1));
-            dTo.value = formatDateStr(new Date(fyStart + 1, 2, 31));
-        } else if (val.startsWith('past_fy_')) {
-            // Handles the dynamic past FYs perfectly
-            const startY = parseInt(val.replace('past_fy_', ''));
-            dFrom.value = formatDateStr(new Date(startY, 3, 1));
-            dTo.value = formatDateStr(new Date(startY + 1, 2, 31));
-        }
-        applyFilters();
-    }
-
     // --- INITIAL FETCH ---
     window.onload = async function() {
         try {
-            populateDynamicFY(); // Builds the FY dropdown immediately
-            
             const [invRes, payRes] = await Promise.all([
                 fetch(`${SUPABASE_URL}/rest/v1/invoices?select=*`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }),
                 fetch(`${SUPABASE_URL}/rest/v1/payments?select=*`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } })
@@ -697,6 +805,7 @@
             document.getElementById('exportBtn').style.display = 'flex'; document.getElementById('newBtn').style.display = 'flex'; document.getElementById('analyticsBtn').style.display = 'flex';
             document.getElementById('liveText').textContent = 'Live'; document.getElementById('liveDot').classList.add('connected');
             
+            populateDynamicDropdowns();
             populateDatalists(); applyFilters(); showToast(`${rawInvoices.length} records loaded`);
         } catch (err) {
             console.error(err); document.getElementById('liveText').textContent = 'Offline'; document.getElementById('liveDot').classList.add('error'); showToast('Connection error','⚠'); tbody.innerHTML = '';
@@ -992,11 +1101,15 @@
         const dFrom = document.getElementById('dateFrom').value.trim();
         const dTo = document.getElementById('dateTo').value.trim();
 
-        document.getElementById('resetFiltersBtn').style.display = (q || shipVal || dFrom || dTo || unpaidOnly) ? 'inline-block' : 'none';
+        // Check the label content instead of a <select> value
+        const presetLabel = document.getElementById('datePresetLabel').textContent;
+        const hasPreset = presetLabel !== "Custom Date...";
+
+        document.getElementById('resetFiltersBtn').style.display = (q || shipVal || dFrom || dTo || unpaidOnly || hasPreset) ? 'inline-block' : 'none';
 
         // Wait until 10 chars are typed so math doesn't glitch mid-typing
         let fromTs = (dFrom.length === 10) ? parseDDMMYYYY(dFrom) : 0;
-        let toTs = (dTo.length === 10) ? parseDDMMYYYY(dTo) + 86399999 : Infinity;
+        let toTs = (dTo.length === 10) ? parseDDMMYYYY(dTo) + 8639999 : Infinity;
 
         currentData = rawInvoices.filter(row => {
             if (unpaidOnly && row._status === "PAID") return false;
@@ -1145,20 +1258,20 @@
     document.getElementById('shipmentFilter').addEventListener('change', applyFilters);
     
     document.getElementById('dateFrom').addEventListener('input', () => { 
-        document.getElementById('datePreset').value = ''; 
+        document.getElementById('datePresetLabel').textContent = 'Custom Date...'; 
         applyFilters(); 
     });
     document.getElementById('dateTo').addEventListener('input', () => { 
-        document.getElementById('datePreset').value = ''; 
+        document.getElementById('datePresetLabel').textContent = 'Custom Date...'; 
         applyFilters(); 
     });
-    
-    document.getElementById('datePreset').addEventListener('change', handleDatePreset);
 
     document.getElementById('resetFiltersBtn').addEventListener('click', () => { 
         document.getElementById('searchBar').value=''; document.getElementById('unpaidFilter').checked=false; 
-        document.getElementById('shipmentFilter').value=''; document.getElementById('datePreset').value=''; 
+        document.getElementById('shipmentFilter').value=''; 
+        document.getElementById('datePresetLabel').textContent = 'Custom Date...';
         document.getElementById('dateFrom').value=''; document.getElementById('dateTo').value=''; applyFilters(); 
     });
 </script>
-</script>
+</body>
+</html>
