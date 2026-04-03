@@ -517,15 +517,27 @@
         return new Date(p[2], p[1]-1, p[0]).getTime();
     }
 
+    function formatDateStr(d) {
+        return `${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${d.getFullYear()}`;
+    }
+
     function clearInput(btn) {
         const input = btn.previousElementSibling;
         if(input) { input.value = ''; input.dispatchEvent(new Event('input')); }
     }
 
     function populateDatalists() {
+        // Populate Suppliers
         const suppliers = [...new Set(rawInvoices.map(r => String(r["Name of the supplier"]||'').trim()).filter(Boolean))].sort();
         document.getElementById('supplierList').innerHTML = suppliers.map(s => `<option value="${s}">`).join('');
-        // itemList is now populated dynamically via handleSupplierInput
+        
+        // Bulletproof Shipment Extraction
+        const shipments = [...new Set(rawInvoices.map(r => {
+            let val = r["SHIPMENT NO."] || r["SHIPMENT NO"] || '';
+            return String(val).trim();
+        }).filter(s => s && s !== "-" && s.toLowerCase() !== "undefined"))].sort();
+        
+        document.getElementById('shipmentFilter').innerHTML = `<option value="">All Shipments</option>` + shipments.map(s => `<option value="${s}">${s}</option>`).join('');
     }
 
     // --- SMART MEMORY & DUPLICATE LOGIC ---
@@ -608,6 +620,34 @@
         invList.innerHTML = uniqueInvs.map(i => `<option value="${i}">`).join('');
         dateList.innerHTML = uniqueDates.map(d => `<option value="${d}">`).join('');
         if (mode === 'pay') tryLoadGlobalLedger();
+    }
+
+    // --- DATE PRESET LOGIC ---
+    function handleDatePreset() {
+        const val = document.getElementById('datePreset').value;
+        const dFrom = document.getElementById('dateFrom');
+        const dTo = document.getElementById('dateTo');
+        const today = new Date();
+        const y = today.getFullYear();
+        const m = today.getMonth();
+
+        if (!val) return;
+
+        if (val === 'thisMonth') {
+            dFrom.value = formatDateStr(new Date(y, m, 1));
+            dTo.value = formatDateStr(new Date(y, m + 1, 0));
+        } else if (val === 'lastMonth') {
+            dFrom.value = formatDateStr(new Date(y, m - 1, 1));
+            dTo.value = formatDateStr(new Date(y, m, 0));
+        } else if (val === 'ytd') {
+            dFrom.value = formatDateStr(new Date(y, 0, 1));
+            dTo.value = formatDateStr(today);
+        } else if (val === 'fy') {
+            const fyStart = m >= 3 ? y : y - 1; // Indian FY: April to March
+            dFrom.value = formatDateStr(new Date(fyStart, 3, 1));
+            dTo.value = formatDateStr(new Date(fyStart + 1, 2, 31));
+        }
+        applyFilters();
     }
 
     // --- INITIAL FETCH ---
@@ -788,7 +828,7 @@
     function clearProductDetails() {
         document.getElementById('inItem').value = ''; document.getElementById('inHsn').value = ''; document.getElementById('inUnit').value = '';
         document.getElementById('inQty').value = '0'; document.getElementById('inRate').value = '0'; document.getElementById('inDiscount').value = '0';
-        document.getElementById('lastPriceLabel').innerText = ""; document.getElementById('dupWarning').style.display = "none";
+        document.getElementById('lastPriceLabel').innerText = ''; document.getElementById('dupWarning').style.display = 'none';
         document.getElementById('inItem').focus(); liveCalc();
     }
 
@@ -824,8 +864,7 @@
         const gross = row._num_qty * row._num_rate; const discount = Math.max(0, gross - row._num_tax); document.getElementById('inDiscount').value = discount;
         let gstPct = (row["GST%"]||'').replace('%',''); document.getElementById('inGstPct').value = gstPct || "0";
         document.getElementById('inShipment').value = row["SHIPMENT NO."] || ''; document.getElementById('inExportHsn').value = row["EXPORT HSN"] || ''; document.getElementById('inType').value = row["EXPORT/DOMESTIC"] || 'DOMESTIC';
-        
-        document.getElementById('lastPriceLabel').innerText = ""; document.getElementById('dupWarning').style.display = "none";
+        document.getElementById('lastPriceLabel').innerText = ""; document.getElementById('dupWarning').style.display = 'none';
         document.getElementById('formModal').classList.add('active'); liveCalc();
     }
 
@@ -931,22 +970,25 @@
 
         document.getElementById('resetFiltersBtn').style.display = (q || shipVal || dFrom || dTo || unpaidOnly) ? 'inline-block' : 'none';
 
-        // BUG FIX: Only filter if date is exactly 10 characters (DD-MM-YYYY) so math doesn't glitch while typing
+        // Wait until 10 chars are typed so math doesn't glitch mid-typing
         let fromTs = (dFrom.length === 10) ? parseDDMMYYYY(dFrom) : 0;
         let toTs = (dTo.length === 10) ? parseDDMMYYYY(dTo) + 86399999 : Infinity;
 
         currentData = rawInvoices.filter(row => {
             if (unpaidOnly && row._status === "PAID") return false;
             
-            // Date Filter Check
+            // Bulletproof Shipment Filter Matching
+            const rowShip = String(row["SHIPMENT NO."] || row["SHIPMENT NO"] || '').trim();
+            if (shipVal && rowShip !== shipVal) return false;
+            
             if (fromTs > 0 || toTs < Infinity) {
                 if (!row._ts_date || row._ts_date < fromTs || row._ts_date > toTs) return false;
             }
-            
-            const matchSearch = columns.some(col => String(row[col]||'').toLowerCase().includes(q));
-            if (!matchSearch) return false;
-            
-            if (shipVal && String(row["SHIPMENT NO."]||'').trim() !== shipVal) return false;
+
+            if (q) {
+                const matchSearch = columns.some(col => String(row[col]||'').toLowerCase().includes(q));
+                if (!matchSearch) return false;
+            }
             return true;
         });
 
@@ -978,7 +1020,6 @@
         data.forEach(r=>{ tax += r._num_tax; gst += r._num_gst; total += r._num_total; let key = `${r["Invoice No."]}||${r["Name of the supplier"]}`.toLowerCase(); if(!uniqBal.has(key)) uniqBal.set(key, r._group_balance); });
         let outst = 0; uniqBal.forEach(b => outst += b);
         
-        // Cancel old animation to prevent number glitching
         if(animFrame) cancelAnimationFrame(animFrame);
         
         const dur=550; const t0=performance.now();
@@ -1077,8 +1118,18 @@
 
     // --- MAIN EVENT LISTENERS ---
     document.getElementById('searchBar').addEventListener('input', applyFilters);
-    document.getElementById('dateFrom').addEventListener('input', applyFilters);
-    document.getElementById('dateTo').addEventListener('input', applyFilters);
+    document.getElementById('shipmentFilter').addEventListener('change', applyFilters);
+    
+    document.getElementById('dateFrom').addEventListener('input', () => { 
+        document.getElementById('datePreset').value = ''; 
+        applyFilters(); 
+    });
+    document.getElementById('dateTo').addEventListener('input', () => { 
+        document.getElementById('datePreset').value = ''; 
+        applyFilters(); 
+    });
+    
+    document.getElementById('datePreset').addEventListener('change', handleDatePreset);
 
     document.getElementById('resetFiltersBtn').addEventListener('click', () => { 
         document.getElementById('searchBar').value=''; document.getElementById('unpaidFilter').checked=false; 
