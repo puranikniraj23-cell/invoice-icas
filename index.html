@@ -533,8 +533,8 @@
     let pendingAdminAction = null; 
     let animFrame = null;
 
-    const columns = ["SI No","Invoice No.","Date","Name of the supplier","GSTIN of the supplier","Description of Goods","Quantity","UNIT","Rate","TAXABLE AMOUNT","GST%","GST","TOTAL AMOUNT","STATUS","ACTIONS"];
-    const colLabels = {"SI No":"No.","Invoice No.":"Invoice","Date":"Date","Name of the supplier":"Supplier","GSTIN of the supplier":"GSTIN","Description of Goods":"Description","Quantity":"Qty","UNIT":"Unit","Rate":"Rate","TAXABLE AMOUNT":"Taxable","GST%":"GST%","GST":"GST","TOTAL AMOUNT":"Total","STATUS":"Status","ACTIONS":"Actions"};
+    const columns = ["SI No","Invoice No.","Date","Name of the supplier","GSTIN of the supplier","Description of Goods","Quantity","UNIT","Rate","TAXABLE AMOUNT","GST%","GST","TOTAL AMOUNT","SHIPMENT NO.","EXPORT HSN","STATUS","ACTIONS"];
+    const colLabels = {"SI No":"No.","Invoice No.":"Invoice","Date":"Date","Name of the supplier":"Supplier","GSTIN of the supplier":"GSTIN","Description of Goods":"Description","Quantity":"Qty","UNIT":"Unit","Rate":"Rate","TAXABLE AMOUNT":"Taxable","GST%":"GST%","GST":"GST","TOTAL AMOUNT":"Total","SHIPMENT NO.":"Shipment No","EXPORT HSN":"Export HSN","STATUS":"Status","ACTIONS":"Actions"};
 
     const headerRow = document.getElementById('tableHeader');
     columns.forEach(col => {
@@ -1188,6 +1188,8 @@
                 <td style="color:var(--text-secondary)">${row["GST%"]||'—'}</td>
                 <td style="font-family:var(--mono);font-size:12px">₹${formatDisplay(row._num_gst)}</td>
                 <td><span class="amount-val">₹${formatDisplay(row._num_total)}</span></td>
+                <td><span class="invoice-tag">${row["SHIPMENT NO."]||'—'}</span></td>
+                <td style="font-family:var(--mono);font-size:11px;color:var(--text-dim)">${row["EXPORT HSN"]||'—'}</td>
                 <td><span class="type-pill ${statClass}">${row._status}</span></td>
                 <td class="action-cell">
                     <button class="action-icon" onclick="generateSmartInvoicePDF('${row["SI No"]}')" title="Print Invoice">📄</button>
