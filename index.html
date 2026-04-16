@@ -1094,14 +1094,13 @@
     }
 
     // --- DASHBOARD & FILTERS LOGIC ---
-    function applyFilters() {
+   function applyFilters() {
         const q = document.getElementById('searchBar').value.toLowerCase().trim();
         const shipVal = document.getElementById('shipmentFilter').value;
         const unpaidOnly = document.getElementById('unpaidFilter').checked;
         const dFrom = document.getElementById('dateFrom').value.trim();
         const dTo = document.getElementById('dateTo').value.trim();
 
-        // Check the label content instead of a <select> value
         const presetLabel = document.getElementById('datePresetLabel').textContent;
         const hasPreset = presetLabel !== "Custom Date...";
 
@@ -1129,27 +1128,120 @@
             return true;
         });
 
+        // --- NEW: Setup Dynamic Container for Invoice Cards ---
         const summaryCard = document.getElementById('supplierSummary');
+        let dynamicContainer = document.getElementById('dynamicInvoiceCards');
+        
+        // If the container doesn't exist yet, build it in JS and inject it
+        if(!dynamicContainer) {
+            dynamicContainer = document.createElement('div');
+            dynamicContainer.id = 'dynamicInvoiceCards';
+            dynamicContainer.style.display = 'flex';
+            dynamicContainer.style.gap = '16px';
+            dynamicContainer.style.overflowX = 'auto'; // Allows scrolling if there are 3+ cards
+            dynamicContainer.style.marginBottom = '16px';
+            dynamicContainer.style.paddingBottom = '8px'; 
+            summaryCard.parentNode.insertBefore(dynamicContainer, summaryCard.nextSibling);
+        }
+        dynamicContainer.innerHTML = ''; // Clear old cards out
+
         const visibleSuppliers = [...new Set(currentData.map(r => String(r["Name of the supplier"]).trim()).filter(Boolean))];
 
-        if (visibleSuppliers.length === 1 && currentData.length > 0 && q.length > 0) {
+        // FORK IN THE ROAD: Check if search query exactly matches an Invoice No.
+        const exactInvoiceMatches = currentData.filter(r => String(r["Invoice No."]).toLowerCase() === q);
+
+        if (exactInvoiceMatches.length > 0 && q.length > 0) {
+            
+            // ==========================================
+            // FORK A: INVOICE BRAIN (Exact match found)
+            // ==========================================
+            summaryCard.style.display = 'none'; // Hide the macro supplier summary
+            
+            // Group the matched rows by Supplier Name
+            const invoiceGroups = {};
+            exactInvoiceMatches.forEach(r => {
+                const sup = r["Name of the supplier"] || "Unknown";
+                if (!invoiceGroups[sup]) invoiceGroups[sup] = [];
+                invoiceGroups[sup].push(r);
+            });
+
+            let cardsHTML = '';
+            // Loop through each supplier and build a card
+            for (const [supName, items] of Object.entries(invoiceGroups)) {
+                let totalAmt = 0, totalTax = 0, totalGst = 0;
+                let invDate = items[0]["Date"];
+                let status = items[0]._status;
+                let statClass = status === 'PAID' ? 'tag-paid' : (status === 'PARTIAL' ? 'tag-partial' : 'tag-pending');
+                let rawInvNo = items[0]["Invoice No."];
+
+                // Tally up the micro-totals for just this invoice
+                items.forEach(i => {
+                    totalAmt += i._num_total;
+                    totalTax += i._num_tax;
+                    totalGst += i._num_gst;
+                });
+
+                // Generate the HTML for the card
+                cardsHTML += `
+                <div style="min-width: 320px; background: var(--surface); border: 1px solid var(--border-strong); border-left: 4px solid var(--accent); border-radius: var(--r-lg); padding: 22px 26px; box-shadow: var(--shadow-sm); animation: fadeUp 0.35s ease both;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                        <div>
+                            <div style="font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px;">Invoice: ${rawInvNo}</div>
+                            <div style="font-size: 18px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;" title="${supName}">${supName}</div>
+                        </div>
+                        <span class="type-pill ${statClass}">${status}</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="stat-box"><span>Date</span><strong style="font-size: 15px;">${invDate}</strong></div>
+                        <div class="stat-box"><span>Total Bill</span><strong style="font-size: 15px;">₹${formatDisplay(totalAmt)}</strong></div>
+                        <div class="stat-box"><span>Taxable</span><strong style="font-size: 14px; color: var(--text-secondary);">₹${formatDisplay(totalTax)}</strong></div>
+                        <div class="stat-box"><span>GST</span><strong style="font-size: 14px; color: var(--text-secondary);">₹${formatDisplay(totalGst)}</strong></div>
+                    </div>
+                </div>`;
+            }
+            // Inject the cards into the container and show it
+            dynamicContainer.innerHTML = cardsHTML;
+            dynamicContainer.style.display = 'flex';
+
+        } else if (visibleSuppliers.length === 1 && currentData.length > 0 && q.length > 0) {
+            
+            // ==========================================
+            // FORK B: SUPPLIER BRAIN (Fallback Logic)
+            // ==========================================
+            dynamicContainer.style.display = 'none'; // Hide invoice cards
+            
             const exactSupplier = visibleSuppliers[0];
             const supData = rawInvoices.filter(r => String(r["Name of the supplier"]).trim() === exactSupplier);
             const uniqueInvoices = new Set(supData.map(r => r["Invoice No."])).size;
+            
             let totalSpend = 0; let latestDate = 0; let latestDateStr = "—"; let itemCounts = {};
             supData.forEach(r => {
                 totalSpend += r._num_total;
                 if(r._ts_date > latestDate) { latestDate = r._ts_date; latestDateStr = r["Date"]; }
                 const item = r["Description of Goods"]; if(item) itemCounts[item] = (itemCounts[item] || 0) + 1;
             });
+            
             let topItem = "—", maxCount = 0;
             for(const [item, count] of Object.entries(itemCounts)) { if(count > maxCount) { maxCount = count; topItem = item; } }
-            document.getElementById('sumName').textContent = exactSupplier; document.getElementById('sumCount').textContent = uniqueInvoices;
-            document.getElementById('sumSpend').textContent = formatINR(totalSpend); document.getElementById('sumDate').textContent = latestDateStr;
-            document.getElementById('sumItem').textContent = topItem; summaryCard.style.display = 'block';
-        } else { summaryCard.style.display = 'none'; }
+            
+            document.getElementById('sumName').textContent = exactSupplier; 
+            document.getElementById('sumCount').textContent = uniqueInvoices;
+            document.getElementById('sumSpend').textContent = formatINR(totalSpend); 
+            document.getElementById('sumDate').textContent = latestDateStr;
+            document.getElementById('sumItem').textContent = topItem; 
+            
+            summaryCard.style.display = 'block';
+
+        } else {
+            // ==========================================
+            // NEITHER: Hide both summaries
+            // ==========================================
+            summaryCard.style.display = 'none';
+            dynamicContainer.style.display = 'none';
+        }
         
-        calculateTotals(currentData); if(isAnalyticsMode) renderAnalytics(); else renderTable(currentData);
+        calculateTotals(currentData); 
+        if(isAnalyticsMode) renderAnalytics(); else renderTable(currentData);
     }
 
     function calculateTotals(data) {
