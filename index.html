@@ -1094,13 +1094,14 @@
     }
 
     // --- DASHBOARD & FILTERS LOGIC ---
-   function applyFilters() {
+    function applyFilters() {
         const q = document.getElementById('searchBar').value.toLowerCase().trim();
         const shipVal = document.getElementById('shipmentFilter').value;
         const unpaidOnly = document.getElementById('unpaidFilter').checked;
         const dFrom = document.getElementById('dateFrom').value.trim();
         const dTo = document.getElementById('dateTo').value.trim();
 
+        // Check the label content instead of a <select> value
         const presetLabel = document.getElementById('datePresetLabel').textContent;
         const hasPreset = presetLabel !== "Custom Date...";
 
@@ -1128,8 +1129,9 @@
             return true;
         });
 
-        // --- NEW: Setup Dynamic Container for Invoice Cards ---
         const summaryCard = document.getElementById('supplierSummary');
+        
+        // --- NEW: Setup Dynamic Container for Invoice Cards ---
         let dynamicContainer = document.getElementById('dynamicInvoiceCards');
         
         // If the container doesn't exist yet, build it in JS and inject it
