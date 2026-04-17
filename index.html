@@ -183,6 +183,11 @@
         .pay-icon:hover { transform: scale(1.15); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); background: transparent; }
         .delete-icon:hover { background: var(--red-bg); color: var(--red); opacity: 1; }
 
+        /* Click to copy styling */
+        .copyable { cursor: pointer; transition: opacity 0.2s; position: relative; display: inline-block; }
+        .copyable:hover { opacity: 0.6; }
+        .copyable:active { transform: scale(0.95); }
+
         /* Modals */
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); z-index: 200; justify-content: center; align-items: center; padding: 20px; opacity: 0; transition: opacity 0.2s ease; }
         .modal-overlay.active { display: flex; opacity: 1; }
@@ -390,18 +395,18 @@
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
                     <div class="form-group">
                         <label class="form-label">Quantity</label>
-                        <div class="input-wrapper"><input type="number" id="inQty" class="control-input" value="0" oninput="liveCalc()"><button class="clear-btn" onclick="clearInput(this)">✕</button></div>
+                        <div class="input-wrapper"><input type="text" inputmode="decimal" id="inQty" class="control-input" value="0" oninput="formatNumberInput(this); liveCalc()"><button class="clear-btn" onclick="clearInput(this)">✕</button></div>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Rate (₹)</label>
-                        <div class="input-wrapper"><input type="number" id="inRate" class="control-input" value="0" oninput="liveCalc()"><button class="clear-btn" onclick="clearInput(this)">✕</button></div>
+                        <div class="input-wrapper"><input type="text" inputmode="decimal" id="inRate" class="control-input" value="0" oninput="formatNumberInput(this); liveCalc()"><button class="clear-btn" onclick="clearInput(this)">✕</button></div>
                         <div id="lastPriceLabel" style="color:var(--accent); font-size:11px; font-weight:700; margin-top:4px;"></div>
                     </div>
                 </div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
                     <div class="form-group">
                         <label class="form-label">Discount (₹)</label>
-                        <div class="input-wrapper"><input type="number" id="inDiscount" class="control-input" value="0" oninput="liveCalc()"><button class="clear-btn" onclick="clearInput(this)">✕</button></div>
+                        <div class="input-wrapper"><input type="text" inputmode="decimal" id="inDiscount" class="control-input" value="0" oninput="formatNumberInput(this); liveCalc()"><button class="clear-btn" onclick="clearInput(this)">✕</button></div>
                     </div>
                     <div class="form-group">
                         <label class="form-label">GST %</label>
@@ -473,7 +478,7 @@
             </div>
             <div style="flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r-md); padding: 20px;">
                 <h4 style="font-size: 13px; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; letter-spacing: 0.5px;">Log New Payment</h4>
-                <div class="form-group"><label class="form-label">Amount Paid (₹)</label><div class="input-wrapper"><input type="number" id="payAmount" class="control-input" placeholder="0"><button class="clear-btn" onclick="clearInput(this)">✕</button></div></div>
+                <div class="form-group"><label class="form-label">Amount Paid (₹)</label><div class="input-wrapper"><input type="text" inputmode="decimal" id="payAmount" class="control-input" placeholder="0" oninput="formatNumberInput(this)"><button class="clear-btn" onclick="clearInput(this)">✕</button></div></div>
                 <div class="form-group"><label class="form-label">Date of Payment</label><div class="input-wrapper"><input type="text" id="payDate" class="control-input" placeholder="DD-MM-YYYY"><button class="clear-btn" onclick="clearInput(this)">✕</button></div></div>
                 <button class="btn btn-primary" style="width: 100%; justify-content: center; margin-bottom: 10px;" id="savePayBtn" onclick="savePayment()">Add Payment</button>
                 <button class="btn btn-secondary" style="width: 100%; justify-content: center;" onclick="generateLedgerPDF()">📄 Download Ledger PDF</button>
@@ -548,12 +553,36 @@
     const tbody = document.getElementById('tableBody');
     for (let i=0; i<8; i++) { const tr=document.createElement('tr'); tr.className='skeleton-row'; tr.innerHTML=columns.map(()=>`<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>`).join(''); tbody.appendChild(tr); }
 
-    // --- CORE UTILITIES ---
+    // --- CORE UTILITIES & UX UPGRADES ---
     function showToast(msg, icon='✓') { const t = document.getElementById('toast'); t.innerHTML = `<span style="opacity:.7">${icon}</span>&nbsp;${msg}`; t.classList.add('visible'); setTimeout(()=>t.classList.remove('visible'), 2800); }
+    
+    function copyText(text, label) {
+        navigator.clipboard.writeText(text).then(() => showToast(`Copied ${label} to clipboard`, '📋'));
+    }
+
+    function formatNumberInput(el) {
+        let val = el.value.replace(/[^0-9.]/g, ''); // keep only numbers and decimals
+        let parts = val.split('.');
+        if(parts.length > 2) val = parts[0] + '.' + parts.slice(1).join(''); // prevent double decimals
+        if(val) {
+            let intPart = parts[0].replace(/\B(?=(?:(\d\d)+(\d)(?!\d))+(?!\d))/g, ","); // Indian comma system
+            el.value = parts.length > 1 ? intPart + '.' + parts[1] : intPart;
+        } else {
+            el.value = '';
+        }
+    }
+
+    function formatDateInput(e) {
+        let v = e.target.value.replace(/\D/g, ''); // strip non-digits
+        if (v.length >= 5) v = `${v.slice(0,2)}-${v.slice(2,4)}-${v.slice(4,8)}`;
+        else if (v.length >= 3) v = `${v.slice(0,2)}-${v.slice(2,4)}`;
+        e.target.value = v;
+    }
     
     function cleanNum(val) { return parseFloat(String(val).replace(/[^0-9.-]+/g, "")) || 0; }
     function formatINR(n) { return new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(n); }
     function formatDisplay(num) { return new Intl.NumberFormat('en-IN', { maximumFractionDigits: 2, minimumFractionDigits: 2 }).format(num); }
+    function addCommas(num) { if(!num) return '0'; let p = num.toString().split('.'); p[0] = p[0].replace(/\B(?=(?:(\d\d)+(\d)(?!\d))+(?!\d))/g, ","); return p.join('.'); }
     
     function parseDDMMYYYY(str) {
         if (!str || str.length !== 10) return 0; const p = str.split('-'); if (p.length !== 3) return 0;
@@ -577,7 +606,6 @@
         body.classList.toggle('show');
     }
 
-    // Close dropdown if clicking outside
     document.addEventListener('click', function(e) {
         const wrapper = document.getElementById('datePresetWrapper');
         if (wrapper && !wrapper.contains(e.target)) {
@@ -591,7 +619,6 @@
         const icon = headerEl.querySelector('.expand-icon');
         const isOpen = content.classList.contains('open');
         
-        // Close siblings
         document.querySelectorAll('.drop-group-content').forEach(el => {
             el.classList.remove('open');
             el.previousElementSibling.querySelector('.expand-icon').textContent = '+';
@@ -605,7 +632,7 @@
 
     function selectDatePreset(val, labelText) {
         document.getElementById('datePresetLabel').textContent = labelText;
-        toggleDateDropdown(); // close it
+        toggleDateDropdown(); 
         
         const dFrom = document.getElementById('dateFrom');
         const dTo = document.getElementById('dateTo');
@@ -613,21 +640,15 @@
         const y = today.getFullYear();
         const m = today.getMonth();
 
-        if (val === 'custom') {
-            dFrom.value = ''; dTo.value = ''; // Let user type
-            dFrom.focus();
-            return;
-        }
+        if (val === 'custom') { dFrom.value = ''; dTo.value = ''; dFrom.focus(); return; }
 
         if (val === 'thisMonth') {
             dFrom.value = formatDateStr(new Date(y, m, 1));
             dTo.value = formatDateStr(new Date(y, m + 1, 0));
         } else if (val.startsWith('month_')) {
             const parts = val.split('_');
-            const targetY = parseInt(parts[1]);
-            const targetM = parseInt(parts[2]);
-            dFrom.value = formatDateStr(new Date(targetY, targetM, 1));
-            dTo.value = formatDateStr(new Date(targetY, targetM + 1, 0));
+            dFrom.value = formatDateStr(new Date(parseInt(parts[1]), parseInt(parts[2]), 1));
+            dTo.value = formatDateStr(new Date(parseInt(parts[1]), parseInt(parts[2]) + 1, 0));
         } else if (val.startsWith('fy_')) {
             const startY = parseInt(val.split('_')[1]);
             dFrom.value = formatDateStr(new Date(startY, 3, 1)); 
@@ -646,36 +667,23 @@
 
         validDates.forEach(ts => {
             const d = new Date(ts);
-            const year = d.getFullYear();
-            const month = d.getMonth();
-            
-            activeMonths.add(`${year}_${month}`);
-            
-            const fyStartYear = month >= 3 ? year : year - 1;
-            activeFYs.add(fyStartYear);
+            activeMonths.add(`${d.getFullYear()}_${d.getMonth()}`);
+            activeFYs.add(d.getMonth() >= 3 ? d.getFullYear() : d.getFullYear() - 1);
         });
 
         const monthContainer = document.getElementById('dynamicMonthsContainer');
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         
         const sortedMonths = Array.from(activeMonths).sort((a,b) => {
-            const [yA, mA] = a.split('_').map(Number);
-            const [yB, mB] = b.split('_').map(Number);
-            if (yA !== yB) return yB - yA;
-            return mB - mA;
+            const [yA, mA] = a.split('_').map(Number); const [yB, mB] = b.split('_').map(Number);
+            if (yA !== yB) return yB - yA; return mB - mA;
         });
 
-        let monthHTML = '';
-        let currentYearForMonth = null;
-
+        let monthHTML = ''; let currentYearForMonth = null;
         sortedMonths.forEach(mStr => {
             const [y, mIndex] = mStr.split('_').map(Number);
-            if (y !== currentYearForMonth) {
-                monthHTML += `<div class="drop-year-label">${y}</div>`;
-                currentYearForMonth = y;
-            }
-            const label = `${monthNames[mIndex]} ${y}`;
-            monthHTML += `<div class="sub-drop-item" onclick="selectDatePreset('month_${y}_${mIndex}', '${label}')">${monthNames[mIndex]}</div>`;
+            if (y !== currentYearForMonth) { monthHTML += `<div class="drop-year-label">${y}</div>`; currentYearForMonth = y; }
+            monthHTML += `<div class="sub-drop-item" onclick="selectDatePreset('month_${y}_${mIndex}', '${monthNames[mIndex]} ${y}')">${monthNames[mIndex]}</div>`;
         });
         monthContainer.innerHTML = monthHTML;
 
@@ -684,8 +692,7 @@
         
         let fyHTML = '';
         sortedFYs.forEach(startY => {
-            const endY = String(startY + 1).slice(-2);
-            const label = `FY ${startY}-${endY}`;
+            const label = `FY ${startY}-${String(startY + 1).slice(-2)}`;
             fyHTML += `<div class="sub-drop-item" onclick="selectDatePreset('fy_${startY}', '${label}')">${label}</div>`;
         });
         fyContainer.innerHTML = fyHTML;
@@ -709,18 +716,12 @@
     // --- SMART MEMORY & DUPLICATE LOGIC ---
     function handleSupplierInput() {
         const supName = document.getElementById('inSupplier').value.trim().toLowerCase();
-        
         const match = rawInvoices.find(r => String(r["Name of the supplier"]||'').trim().toLowerCase() === supName);
         if (match && match["GSTIN of the supplier"] && match["GSTIN of the supplier"] !== "-" && match["GSTIN of the supplier"] !== "URD") { 
             document.getElementById('inGstin').value = match["GSTIN of the supplier"]; 
         }
-
-        const supItems = [...new Set(rawInvoices
-            .filter(r => String(r["Name of the supplier"]).toLowerCase() === supName && r["Description of Goods"] && r["Description of Goods"] !== "-")
-            .map(r => r["Description of Goods"])
-        )].sort();
+        const supItems = [...new Set(rawInvoices.filter(r => String(r["Name of the supplier"]).toLowerCase() === supName && r["Description of Goods"] && r["Description of Goods"] !== "-").map(r => r["Description of Goods"]))].sort();
         document.getElementById('itemList').innerHTML = supItems.map(i => `<option value="${i}">`).join('');
-        
         checkDuplicateItem();
     }
 
@@ -729,10 +730,7 @@
         const sup = document.getElementById('inSupplier').value.trim().toLowerCase();
         if (!item) { document.getElementById('lastPriceLabel').innerText = ""; return; }
 
-        const history = rawInvoices
-            .filter(r => String(r["Description of Goods"]).toLowerCase() === item)
-            .sort((a,b) => b._ts_date - a._ts_date);
-
+        const history = rawInvoices.filter(r => String(r["Description of Goods"]).toLowerCase() === item).sort((a,b) => b._ts_date - a._ts_date);
         if(history.length > 0) {
             const hsnObj = history.find(r => r["HSN/SAC"] && r["HSN/SAC"] !== "-" && String(r["HSN/SAC"]).trim() !== "");
             const unitObj = history.find(r => r["UNIT"] && r["UNIT"] !== "-" && String(r["UNIT"]).trim() !== "");
@@ -743,14 +741,9 @@
             if(expObj) document.getElementById('inExportHsn').value = expObj["EXPORT HSN"];
 
             const supHistory = history.filter(r => String(r["Name of the supplier"]).toLowerCase() === sup);
-            if(supHistory.length > 0) {
-                document.getElementById('lastPriceLabel').innerText = `Last Rate: ₹${supHistory[0]["Rate"]}`;
-            } else {
-                document.getElementById('lastPriceLabel').innerText = "";
-            }
-        } else {
-            document.getElementById('lastPriceLabel').innerText = "";
-        }
+            if(supHistory.length > 0) document.getElementById('lastPriceLabel').innerText = `Last Rate: ₹${supHistory[0]["Rate"]}`;
+            else document.getElementById('lastPriceLabel').innerText = "";
+        } else document.getElementById('lastPriceLabel').innerText = "";
         checkDuplicateItem();
     }
 
@@ -758,13 +751,10 @@
         const sup = document.getElementById('inSupplier').value.trim().toLowerCase();
         const inv = document.getElementById('inInvoice').value.trim().toLowerCase();
         const item = document.getElementById('inItem').value.trim().toLowerCase();
-        
         if(sup && inv && item) {
             const isDup = rawInvoices.some(r => String(r["Name of the supplier"]).toLowerCase() === sup && String(r["Invoice No."]).toLowerCase() === inv && String(r["Description of Goods"]).toLowerCase() === item);
             document.getElementById('dupWarning').style.display = isDup ? 'block' : 'none';
-        } else {
-            document.getElementById('dupWarning').style.display = 'none';
-        }
+        } else document.getElementById('dupWarning').style.display = 'none';
     }
 
     function updateLinkedSearch(mode) {
@@ -785,6 +775,17 @@
     // --- INITIAL FETCH ---
     window.onload = async function() {
         try {
+            // Attach auto-formatters to dates
+            ['inDate', 'payDate', 'dateFrom', 'dateTo', 'gPayDate', 'gPrintDate'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.addEventListener('input', formatDateInput);
+            });
+
+            // Attach Keyboard Warrior Enter Save
+            document.getElementById('inType').addEventListener('keydown', function(e) {
+                if(e.key === 'Enter') { e.preventDefault(); saveToDatabase(); }
+            });
+
             const [invRes, payRes] = await Promise.all([
                 fetch(`${SUPABASE_URL}/rest/v1/invoices?select=*`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }),
                 fetch(`${SUPABASE_URL}/rest/v1/payments?select=*`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } })
@@ -895,13 +896,13 @@
     }
 
     async function savePayment() {
-        const amt = parseFloat(document.getElementById('payAmount').value); const date = document.getElementById('payDate').value.trim();
+        const amt = parseFloat(document.getElementById('payAmount').value.replace(/,/g, '')); const date = document.getElementById('payDate').value.trim();
         if(!amt || amt <= 0 || !date) { showToast("Enter a valid amount and date","⚠"); return; }
         const btn = document.getElementById('savePayBtn'); btn.disabled = true; btn.textContent = "Saving...";
         
         const payload = { "invoice_no": currentPayInvoice, "supplier_name": currentPaySupplier, "amount": Number(amt), "payment_date": date };
         try {
-            const res = await fetch(`${SUPABASE_URL}/rest/v1/payments`, { method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' }, body: JSON.stringify(payload) });
+            const res = await fetch(`${SUPSUPABASE_URL}/rest/v1/payments`, { method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' }, body: JSON.stringify(payload) });
             if (!res.ok) throw new Error("Payment failed");
             const savedPay = await res.json(); rawPayments.push(savedPay[0]);
             processPaymentsEngine(); refreshLedgerUI(); applyFilters(); document.getElementById('payAmount').value = ''; showToast("Payment Logged!", "💰");
@@ -962,19 +963,21 @@
         document.getElementById('inItem').value = ''; document.getElementById('inHsn').value = ''; document.getElementById('inUnit').value = '';
         document.getElementById('inQty').value = '0'; document.getElementById('inRate').value = '0'; document.getElementById('inDiscount').value = '0';
         document.getElementById('lastPriceLabel').innerText = ''; document.getElementById('dupWarning').style.display = 'none';
-        document.getElementById('inItem').focus(); liveCalc();
+        liveCalc();
     }
 
     function clearEntireForm() {
         document.getElementById('inSupplier').value = ''; document.getElementById('inGstin').value = ''; document.getElementById('inInvoice').value = ''; 
         document.getElementById('inShipment').value = ''; document.getElementById('inExportHsn').value = ''; document.getElementById('inType').value = 'DOMESTIC';
         const today = new Date(); document.getElementById('inDate').value = `${String(today.getDate()).padStart(2,'0')}-${String(today.getMonth()+1).padStart(2,'0')}-${today.getFullYear()}`;
-        clearProductDetails();
+        clearProductDetails(); document.getElementById('inSupplier').focus();
     }
 
     function liveCalc() {
-        const qty = parseFloat(document.getElementById('inQty').value) || 0; const rate = parseFloat(document.getElementById('inRate').value) || 0;
-        const discount = parseFloat(document.getElementById('inDiscount').value) || 0; const gstPct = parseFloat(document.getElementById('inGstPct').value) || 0;
+        const qty = parseFloat(document.getElementById('inQty').value.replace(/,/g, '')) || 0; 
+        const rate = parseFloat(document.getElementById('inRate').value.replace(/,/g, '')) || 0;
+        const discount = parseFloat(document.getElementById('inDiscount').value.replace(/,/g, '')) || 0; 
+        const gstPct = parseFloat(document.getElementById('inGstPct').value) || 0;
         
         const gross = Math.round((qty * rate) * 100) / 100; 
         const tax = Math.max(0, Math.round((gross - discount) * 100) / 100); 
@@ -992,9 +995,11 @@
         document.getElementById('inSupplier').value = row["Name of the supplier"] || ''; document.getElementById('inGstin').value = row["GSTIN of the supplier"] || '';
         document.getElementById('inInvoice').value = row["Invoice No."] || ''; document.getElementById('inDate').value = row["Date"] || '';
         document.getElementById('inItem').value = row["Description of Goods"] || ''; document.getElementById('inHsn').value = row["HSN/SAC"] || '';
-        document.getElementById('inUnit').value = row["UNIT"] || ''; document.getElementById('inQty').value = row._num_qty || 0;
-        document.getElementById('inRate').value = row._num_rate || 0;
-        const gross = row._num_qty * row._num_rate; const discount = Math.max(0, gross - row._num_tax); document.getElementById('inDiscount').value = discount;
+        document.getElementById('inUnit').value = row["UNIT"] || ''; 
+        document.getElementById('inQty').value = addCommas(row._num_qty || 0);
+        document.getElementById('inRate').value = addCommas(row._num_rate || 0);
+        const gross = row._num_qty * row._num_rate; const discount = Math.max(0, gross - row._num_tax); 
+        document.getElementById('inDiscount').value = addCommas(discount);
         let gstPct = (row["GST%"]||'').replace('%',''); document.getElementById('inGstPct').value = gstPct || "0";
         document.getElementById('inShipment').value = row["SHIPMENT NO."] || ''; document.getElementById('inExportHsn').value = row["EXPORT HSN"] || ''; document.getElementById('inType').value = row["EXPORT/DOMESTIC"] || 'DOMESTIC';
         document.getElementById('lastPriceLabel').innerText = ""; document.getElementById('dupWarning').style.display = 'none';
@@ -1018,9 +1023,9 @@
             let gstin = document.getElementById('inGstin').value;
             if (!gstin) { const found = rawInvoices.find(r => r["Name of the supplier"] === supplier); if (found && found["GSTIN of the supplier"]) gstin = found["GSTIN of the supplier"]; }
             
-            const qty = parseFloat(document.getElementById('inQty').value) || 0; 
-            const rate = parseFloat(document.getElementById('inRate').value) || 0;
-            const discount = parseFloat(document.getElementById('inDiscount').value) || 0; 
+            const qty = parseFloat(document.getElementById('inQty').value.replace(/,/g, '')) || 0; 
+            const rate = parseFloat(document.getElementById('inRate').value.replace(/,/g, '')) || 0;
+            const discount = parseFloat(document.getElementById('inDiscount').value.replace(/,/g, '')) || 0; 
             const gstPct = parseFloat(document.getElementById('inGstPct').value) || 0;
             
             const gross = Math.round((qty * rate) * 100) / 100; 
@@ -1083,7 +1088,15 @@
             
             if(editingId) { const idx = rawInvoices.findIndex(r => r["SI No"] === editingId); if(idx !== -1) rawInvoices[idx] = normalizedRow; } else { rawInvoices.push(normalizedRow); }
             
-            processPaymentsEngine(); populateDatalists(); applyFilters(); showToast(editingId ? "Invoice updated!" : "Invoice saved!"); closeFormModal();
+            processPaymentsEngine(); populateDatalists(); applyFilters(); showToast(editingId ? "Invoice updated!" : "Invoice saved!"); 
+            
+            if(editingId) {
+                closeFormModal();
+            } else {
+                // Keyboard Warrior Mode: Clear item fields, keep supplier/invoice, jump to item box
+                clearProductDetails();
+                document.getElementById('inItem').focus();
+            }
             
         } catch(err) { 
             console.error(err); 
@@ -1101,27 +1114,21 @@
         const dFrom = document.getElementById('dateFrom').value.trim();
         const dTo = document.getElementById('dateTo').value.trim();
 
-        // Check the label content instead of a <select> value
         const presetLabel = document.getElementById('datePresetLabel').textContent;
         const hasPreset = presetLabel !== "Custom Date...";
 
         document.getElementById('resetFiltersBtn').style.display = (q || shipVal || dFrom || dTo || unpaidOnly || hasPreset) ? 'inline-block' : 'none';
 
-        // Wait until 10 chars are typed so math doesn't glitch mid-typing
         let fromTs = (dFrom.length === 10) ? parseDDMMYYYY(dFrom) : 0;
         let toTs = (dTo.length === 10) ? parseDDMMYYYY(dTo) + 8639999 : Infinity;
 
         currentData = rawInvoices.filter(row => {
             if (unpaidOnly && row._status === "PAID") return false;
-            
-            // Bulletproof Shipment Filter Matching
             const rowShip = String(row["SHIPMENT NO."] || row["SHIPMENT NO"] || '').trim();
             if (shipVal && rowShip !== shipVal) return false;
-            
             if (fromTs > 0 || toTs < Infinity) {
                 if (!row._ts_date || row._ts_date < fromTs || row._ts_date > toTs) return false;
             }
-
             if (q) {
                 const matchSearch = columns.some(col => String(row[col]||'').toLowerCase().includes(q));
                 if (!matchSearch) return false;
@@ -1131,35 +1138,25 @@
 
         const summaryCard = document.getElementById('supplierSummary');
         
-        // --- NEW: Setup Dynamic Container for Invoice Cards ---
         let dynamicContainer = document.getElementById('dynamicInvoiceCards');
-        
-        // If the container doesn't exist yet, build it in JS and inject it
         if(!dynamicContainer) {
             dynamicContainer = document.createElement('div');
             dynamicContainer.id = 'dynamicInvoiceCards';
             dynamicContainer.style.display = 'flex';
             dynamicContainer.style.gap = '16px';
-            dynamicContainer.style.overflowX = 'auto'; // Allows scrolling if there are 3+ cards
+            dynamicContainer.style.overflowX = 'auto'; 
             dynamicContainer.style.marginBottom = '16px';
             dynamicContainer.style.paddingBottom = '8px'; 
             summaryCard.parentNode.insertBefore(dynamicContainer, summaryCard.nextSibling);
         }
-        dynamicContainer.innerHTML = ''; // Clear old cards out
+        dynamicContainer.innerHTML = ''; 
 
         const visibleSuppliers = [...new Set(currentData.map(r => String(r["Name of the supplier"]).trim()).filter(Boolean))];
-
-        // FORK IN THE ROAD: Check if search query exactly matches an Invoice No.
         const exactInvoiceMatches = currentData.filter(r => String(r["Invoice No."]).toLowerCase() === q);
 
         if (exactInvoiceMatches.length > 0 && q.length > 0) {
+            summaryCard.style.display = 'none'; 
             
-            // ==========================================
-            // FORK A: INVOICE BRAIN (Exact match found)
-            // ==========================================
-            summaryCard.style.display = 'none'; // Hide the macro supplier summary
-            
-            // Group the matched rows by Supplier Name
             const invoiceGroups = {};
             exactInvoiceMatches.forEach(r => {
                 const sup = r["Name of the supplier"] || "Unknown";
@@ -1168,7 +1165,6 @@
             });
 
             let cardsHTML = '';
-            // Loop through each supplier and build a card
             for (const [supName, items] of Object.entries(invoiceGroups)) {
                 let totalAmt = 0, totalTax = 0, totalGst = 0;
                 let invDate = items[0]["Date"];
@@ -1176,14 +1172,8 @@
                 let statClass = status === 'PAID' ? 'tag-paid' : (status === 'PARTIAL' ? 'tag-partial' : 'tag-pending');
                 let rawInvNo = items[0]["Invoice No."];
 
-                // Tally up the micro-totals for just this invoice
-                items.forEach(i => {
-                    totalAmt += i._num_total;
-                    totalTax += i._num_tax;
-                    totalGst += i._num_gst;
-                });
+                items.forEach(i => { totalAmt += i._num_total; totalTax += i._num_tax; totalGst += i._num_gst; });
 
-                // Generate the HTML for the card
                 cardsHTML += `
                 <div style="min-width: 320px; background: var(--surface); border: 1px solid var(--border-strong); border-left: 4px solid var(--accent); border-radius: var(--r-lg); padding: 22px 26px; box-shadow: var(--shadow-sm); animation: fadeUp 0.35s ease both;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
@@ -1201,18 +1191,12 @@
                     </div>
                 </div>`;
             }
-            // Inject the cards into the container and show it
             dynamicContainer.innerHTML = cardsHTML;
             dynamicContainer.style.display = 'flex';
             currentData = exactInvoiceMatches;
 
         } else if (visibleSuppliers.length === 1 && currentData.length > 0 && q.length > 0) {
-            
-            // ==========================================
-            // FORK B: SUPPLIER BRAIN (Fallback Logic)
-            // ==========================================
-            dynamicContainer.style.display = 'none'; // Hide invoice cards
-            
+            dynamicContainer.style.display = 'none'; 
             const exactSupplier = visibleSuppliers[0];
             const supData = rawInvoices.filter(r => String(r["Name of the supplier"]).trim() === exactSupplier);
             const uniqueInvoices = new Set(supData.map(r => r["Invoice No."])).size;
@@ -1236,9 +1220,6 @@
             summaryCard.style.display = 'block';
 
         } else {
-            // ==========================================
-            // NEITHER: Hide both summaries
-            // ==========================================
             summaryCard.style.display = 'none';
             dynamicContainer.style.display = 'none';
         }
@@ -1271,10 +1252,10 @@
             let statClass = row._status === 'PAID' ? 'tag-paid' : (row._status === 'PARTIAL' ? 'tag-partial' : 'tag-pending');
             html+=`<tr>
                 <td style="color:var(--text-dim);font-size:11px;font-family:var(--mono)">${row["SI No"]||'—'}</td>
-                <td><span class="invoice-tag">${row["Invoice No."]||'—'}</span></td>
+                <td><span class="invoice-tag copyable" onclick="copyText('${(row["Invoice No."]||'').replace(/'/g,"\\'")}', 'Invoice Number')" title="Click to copy">${row["Invoice No."]||'—'}</span></td>
                 <td style="font-family:var(--mono);font-size:12px">${row["Date"]||'—'}</td>
                 <td><span class="text-main">${row["Name of the supplier"]||'—'}</span></td>
-                <td style="font-family:var(--mono);font-size:11px;color:var(--text-dim)">${row["GSTIN of the supplier"]||'—'}</td>
+                <td style="font-family:var(--mono);font-size:11px;color:var(--text-dim)"><span class="copyable" onclick="copyText('${row["GSTIN of the supplier"]||''}', 'GSTIN')" title="Click to copy">${row["GSTIN of the supplier"]||'—'}</span></td>
                 <td><span class="item-link" onclick="openChart('${(row["Description of Goods"]||'').replace(/'/g,"\\'")}')">${row["Description of Goods"]||'—'}</span></td>
                 <td style="text-align:right">${row["Quantity"]||'—'}</td>
                 <td style="color:var(--text-secondary)">${row["UNIT"]||'—'}</td>
@@ -1282,7 +1263,7 @@
                 <td style="font-family:var(--mono);font-size:12px">₹${formatDisplay(row._num_tax)}</td>
                 <td style="color:var(--text-secondary)">${row["GST%"]||'—'}</td>
                 <td style="font-family:var(--mono);font-size:12px">₹${formatDisplay(row._num_gst)}</td>
-                <td><span class="amount-val">₹${formatDisplay(row._num_total)}</span></td>
+                <td><span class="amount-val copyable" onclick="copyText('${row._num_total}', 'Total Amount')" title="Click to copy">₹${formatDisplay(row._num_total)}</span></td>
                 <td><span class="invoice-tag">${row["SHIPMENT NO."]||'—'}</span></td>
                 <td style="font-family:var(--mono);font-size:11px;color:var(--text-dim)">${row["EXPORT HSN"]||'—'}</td>
                 <td><span class="type-pill ${statClass}">${row._status}</span></td>
