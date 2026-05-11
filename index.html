@@ -538,7 +538,7 @@
     let pendingAdminAction = null; 
     let animFrame = null;
 
-    const columns = ["SI No","Invoice No.","Date","Name of the supplier","GSTIN of the supplier","Description of Goods","Quantity","UNIT","Rate","TAXABLE AMOUNT","GST%","GST","TOTAL AMOUNT","SHIPMENT NO.","EXPORT HSN","STATUS","ACTIONS"];
+    const columns = ["SI No","Invoice No.","Date","Name of the supplier","GSTIN of the supplier","Description of Goods","HSN/SAC","Quantity","UNIT","Rate","TAXABLE AMOUNT","GST%","GST","TOTAL AMOUNT","SHIPMENT NO.","EXPORT HSN","STATUS","ACTIONS"];
     const colLabels = {"SI No":"No.","Invoice No.":"Invoice","Date":"Date","Name of the supplier":"Supplier","GSTIN of the supplier":"GSTIN","Description of Goods":"Description","Quantity":"Qty","UNIT":"Unit","Rate":"Rate","TAXABLE AMOUNT":"Taxable","GST%":"GST%","GST":"GST","TOTAL AMOUNT":"Total","SHIPMENT NO.":"Shipment No","EXPORT HSN":"Export HSN","STATUS":"Status","ACTIONS":"Actions"};
 
     const headerRow = document.getElementById('tableHeader');
@@ -1244,9 +1244,9 @@
         })(t0);
     }
 
-    function renderTable(data) {
+   function renderTable(data) {
         document.getElementById('stats').textContent=`${data.length.toLocaleString('en-IN')} record${data.length!==1?'s':''}`;
-        if(!data.length){ tbody.innerHTML=`<tr><td colspan="15" style="text-align:center;padding:60px;color:var(--text-dim);">No records match.</td></tr>`; return; }
+        if(!data.length){ tbody.innerHTML=`<tr><td colspan="16" style="text-align:center;padding:60px;color:var(--text-dim);">No records match.</td></tr>`; return; }
         let html='';
         data.forEach(row=>{
             let statClass = row._status === 'PAID' ? 'tag-paid' : (row._status === 'PARTIAL' ? 'tag-partial' : 'tag-pending');
@@ -1257,6 +1257,9 @@
                 <td><span class="text-main">${row["Name of the supplier"]||'—'}</span></td>
                 <td style="font-family:var(--mono);font-size:11px;color:var(--text-dim)"><span class="copyable" onclick="copyText('${row["GSTIN of the supplier"]||''}', 'GSTIN')" title="Click to copy">${row["GSTIN of the supplier"]||'—'}</span></td>
                 <td><span class="item-link" onclick="openChart('${(row["Description of Goods"]||'').replace(/'/g,"\\'")}')">${row["Description of Goods"]||'—'}</span></td>
+                
+                <td><span class="hsn-pill">${row["HSN/SAC"]||'—'}</span></td>
+                
                 <td style="text-align:right">${row["Quantity"]||'—'}</td>
                 <td style="color:var(--text-secondary)">${row["UNIT"]||'—'}</td>
                 <td><span class="rate-val">₹${row["Rate"]||'0'}</span></td>
