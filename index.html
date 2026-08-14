@@ -483,7 +483,7 @@
             </div>
             <div style="flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r-md); padding: 20px;">
                 <h4 style="font-size: 13px; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; letter-spacing: 0.5px;">Log New Payment</h4>
-                <div class="form-group"><label class="form-label">Amount Paid (₹)</label><div class="input-wrapper"><input type="text" inputmode="decimal" id="payAmount" class="control-input" placeholder="0" oninput="formatNumberInput(this)"><button class="clear-btn" onclick="clearInput(this)">✕</button></div></div>
+                <div class="form-group"><label class="form-label">Amount Paid (₹)</label><div class="input-wrapper"><input type=\"text\" inputmode="decimal" id="payAmount" class="control-input" placeholder="0" oninput="formatNumberInput(this)"><button class="clear-btn" onclick="clearInput(this)">✕</button></div></div>
                 <div class="form-group"><label class="form-label">Date of Payment</label><div class="input-wrapper"><input type="text" id="payDate" class="control-input" placeholder="DD-MM-YYYY"><button class="clear-btn" onclick="clearInput(this)">✕</button></div></div>
                 <button class="btn btn-primary" style="width: 100%; justify-content: center; margin-bottom: 10px;" id="savePayBtn" onclick="savePayment()">Add Payment</button>
                 <button class="btn btn-secondary" style="width: 100%; justify-content: center;" onclick="generateLedgerPDF()">📄 Download Ledger PDF</button>
@@ -540,6 +540,7 @@
     let rawInvoices=[], rawPayments=[], currentData=[];
     let sortCol=null, sortAsc=true, isAnalyticsMode=false, editingId=null;
     let currentShipmentFilter = '';
+    let currentShipmentFY = '';
     let currentPayInvoice=null, currentPaySupplier=null; 
     let pendingAdminAction = null; 
     let animFrame = null;
@@ -618,8 +619,9 @@
         header.classList.toggle('active'); body.classList.toggle('show');
     }
 
-    function selectShipmentFilter(val, labelText) {
-        currentShipmentFilter = val;
+    function selectShipmentFilter(shipNo, fy, labelText) {
+        currentShipmentFilter = shipNo;
+        currentShipmentFY = fy;
         document.getElementById('shipmentLabel').textContent = labelText;
         document.getElementById('shipmentHeader').classList.remove('active');
         document.getElementById('shipmentDropdownBody').classList.remove('show');
@@ -730,28 +732,39 @@
         const suppliers = [...new Set(rawInvoices.map(r => String(r["Name of the supplier"]||'').trim()).filter(Boolean))].sort();
         document.getElementById('supplierList').innerHTML = suppliers.map(s => `<option value="${s}">`).join('');
         
-        const shipments = [...new Set(rawInvoices.map(r => {
-            let val = r["SHIPMENT NO."] || r["SHIPMENT NO"] || '';
-            return String(val).trim();
-        }).filter(s => s && s !== "-" && s.toLowerCase() !== "undefined"))].sort();
-        
         let fyGroups = {};
-        let noFyGroup = [];
+        let noFyGroup = new Set();
         
-        shipments.forEach(s => {
-            let match = s.match(/FY\s?\d{2}-\d{2}/i); // Auto-detects FY tags
-            if (match) {
-                let fy = match[0].toUpperCase();
-                if (!fyGroups[fy]) fyGroups[fy] = [];
-                fyGroups[fy].push(s);
+        rawInvoices.forEach(r => {
+            let shipNo = String(r["SHIPMENT NO."] || r["SHIPMENT NO"] || '').trim();
+            if (!shipNo || shipNo === "-" || shipNo.toLowerCase() === "undefined") return;
+            
+            let fy = "";
+            let shipGroup = String(r["SHIPMENT GROUP"] || '').trim(); // Fallback check if column exists
+            
+            if (shipGroup && shipGroup.toUpperCase().includes("FY")) {
+                let match = shipGroup.match(/FY\s?\d{2}-\d{2}/i);
+                if(match) fy = match[0].toUpperCase().replace(" ", "");
+            }
+            
+            // Dynamic Math Calculation from Date if no text string was found
+            if (!fy && r._ts_date) {
+                let d = new Date(r._ts_date);
+                let y = d.getFullYear() % 100;
+                let m = d.getMonth() + 1;
+                fy = (m >= 4) ? `FY${y}-${y+1}` : `FY${y-1}-${y}`;
+            }
+            
+            if (fy) {
+                if (!fyGroups[fy]) fyGroups[fy] = new Set();
+                fyGroups[fy].add(shipNo);
             } else {
-                noFyGroup.push(s);
+                noFyGroup.add(shipNo);
             }
         });
         
-        let shipHTML = `<div class="drop-item" onclick="selectShipmentFilter('', 'All Shipments')">All Shipments</div>`;
+        let shipHTML = `<div class="drop-item" onclick="selectShipmentFilter('', '', 'All Shipments')">All Shipments</div>`;
         
-        // Build Financial Year Folders
         Object.keys(fyGroups).sort().reverse().forEach(fy => {
             shipHTML += `
             <div class="drop-group">
@@ -760,17 +773,19 @@
                 </div>
                 <div class="drop-group-content">
             `;
-            fyGroups[fy].forEach(s => {
-                // Remove the FY tag from the display name so it just says "101" or "Airway"
-                let displayVal = s.replace(new RegExp('\\s*' + fy, 'i'), '').trim();
-                if(!displayVal) displayVal = s; 
-                shipHTML += `<div class="sub-drop-item" onclick="selectShipmentFilter('${s}', '${s}')">${displayVal}</div>`;
+            let sortedShips = Array.from(fyGroups[fy]).sort((a,b) => {
+                let numA = parseInt(a.replace(/\D/g, ''));
+                let numB = parseInt(b.replace(/\D/g, ''));
+                if(!isNaN(numA) && !isNaN(numB)) return numA - numB;
+                return a.localeCompare(b);
+            });
+            sortedShips.forEach(s => {
+                shipHTML += `<div class="sub-drop-item" onclick="selectShipmentFilter('${s}', '${fy}', '${s} (${fy})')">${s}</div>`;
             });
             shipHTML += `</div></div>`;
         });
         
-        // Build "Other" Folder (For shipments without an FY tag)
-        if (noFyGroup.length > 0) {
+        if (noFyGroup.size > 0) {
             shipHTML += `
             <div class="drop-group">
                 <div class="drop-group-header" onclick="toggleGroup(this)">
@@ -778,8 +793,8 @@
                 </div>
                 <div class="drop-group-content">
             `;
-            noFyGroup.forEach(s => {
-                shipHTML += `<div class="sub-drop-item" onclick="selectShipmentFilter('${s}', '${s}')">${s}</div>`;
+            Array.from(noFyGroup).sort().forEach(s => {
+                shipHTML += `<div class="sub-drop-item" onclick="selectShipmentFilter('${s}', '', '${s}')">${s}</div>`;
             });
             shipHTML += `</div></div>`;
         }
@@ -1186,6 +1201,7 @@
     function applyFilters() {
         const q = document.getElementById('searchBar').value.toLowerCase().trim();
         const shipVal = currentShipmentFilter;
+        const shipFY = currentShipmentFY;
         const unpaidOnly = document.getElementById('unpaidFilter').checked;
         const dFrom = document.getElementById('dateFrom').value.trim();
         const dTo = document.getElementById('dateTo').value.trim();
@@ -1200,8 +1216,29 @@
 
         currentData = rawInvoices.filter(row => {
             if (unpaidOnly && row._status === "PAID") return false;
+            
             const rowShip = String(row["SHIPMENT NO."] || row["SHIPMENT NO"] || '').trim();
             if (shipVal && rowShip !== shipVal) return false;
+            
+            if (shipVal && shipFY) {
+                let rowFy = "";
+                let shipGroup = String(row["SHIPMENT GROUP"] || '').trim();
+                
+                if (shipGroup && shipGroup.toUpperCase().includes("FY")) {
+                    let match = shipGroup.match(/FY\s?\d{2}-\d{2}/i);
+                    if(match) rowFy = match[0].toUpperCase().replace(" ", "");
+                }
+                
+                if (!rowFy && row._ts_date) {
+                    let d = new Date(row._ts_date);
+                    let y = d.getFullYear() % 100;
+                    let m = d.getMonth() + 1;
+                    rowFy = (m >= 4) ? `FY${y}-${y+1}` : `FY${y-1}-${y}`;
+                }
+                
+                if (rowFy !== shipFY) return false;
+            }
+
             if (fromTs > 0 || toTs < Infinity) {
                 if (!row._ts_date || row._ts_date < fromTs || row._ts_date > toTs) return false;
             }
@@ -1424,7 +1461,7 @@
 
     document.getElementById('resetFiltersBtn').addEventListener('click', () => { 
         document.getElementById('searchBar').value=''; document.getElementById('unpaidFilter').checked=false; 
-        currentShipmentFilter=''; document.getElementById('shipmentLabel').textContent='All Shipments'; 
+        currentShipmentFilter=''; currentShipmentFY=''; document.getElementById('shipmentLabel').textContent='All Shipments'; 
         document.getElementById('datePresetLabel').textContent = 'Custom Date...';
         document.getElementById('dateFrom').value=''; document.getElementById('dateTo').value=''; applyFilters(); 
     });
